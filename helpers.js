@@ -61,6 +61,19 @@ export function leadingZero(number, length=2) {
 }
 
 /**
+ * Makes first letter capital
+ * 
+ * @param {*} str 
+ */
+export function title(str) {
+    if (str.length > 0)
+        return str[0].toUpperCase() + str.slice(1)
+        
+    else
+        return ""
+}
+
+/**
  * Checks if modName isn't empty and for invalid or
  * Duplicate addresses
  * 

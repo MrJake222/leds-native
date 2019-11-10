@@ -14,7 +14,7 @@ export default class App extends React.Component {
         const AppContainer = createAppContainer(
             createSwitchNavigator({
                 ConnectionWrapper: {
-                    screen: connect(ConnectionWrapper.mapStateToProps)(ConnectionWrapper)
+                    screen: ConnectionWrapper
                 },
 
                 AppConfig: {

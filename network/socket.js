@@ -1,7 +1,8 @@
 import SocketIOClient from 'socket.io-client'
-import { serverUpdateConnectionStatus, modDeleteModule, modClearModules, modNameAddressUpdate, modFieldUpdate } from '../redux/actions';
+import { serverUpdateConnectionStatus, modDeleteModule, modClearModules, modNameAddressUpdate, modFieldUpdate, appLoadState } from '../redux/actions';
 
-import loadDatabase, { addToStore, loadState } from './updateDatabase';
+import { loadDatabase, loadDoc, addToStore } from './updateDatabase';
+import { AsyncStorage } from 'react-native'
 
 export var socketGlobal
 var initialized = false
@@ -18,6 +19,8 @@ export function initSocketIO(serverAddress, serverPort, store) {
     if (initialized)
         return
 
+    initialized = true
+
     const addr = "http://" + serverAddress + ":" + serverPort
     console.log(addr)    
     
@@ -28,7 +31,7 @@ export function initSocketIO(serverAddress, serverPort, store) {
 
     // ---------------------------------------------------------------------------------------
     socket.on("connect", () => {
-        console.log("Socket connected")
+        // console.log("Socket connected")
 
         store.dispatch(serverUpdateConnectionStatus(true, "Connected"))
         socketGlobal = socket
@@ -36,24 +39,41 @@ export function initSocketIO(serverAddress, serverPort, store) {
     })
 
     socket.on("disconnect", () => {
-        console.log("Socket disconnected")
+        // console.log("Socket disconnected")
 
         store.dispatch(serverUpdateConnectionStatus(false, "Disonnected"))
     })
 
-    socket.on("init", (lastModified) => {
-        if (loadState == 0)
-            loadDatabase(lastModified, socket)
+    socket.on("init", ({lastModified, force}) => {
+        // console.log("init")
+
+        if (!store.getState().appStatus.isAppLoaded) {
+            loadDatabase(lastModified, socket, force)
+        }
     })
 
-    socket.on("forceReload", (lastModified) => {
-        // loadState = 0
-        store.dispatch(modClearModules())
+    socket.on("added", async ({fieldName, docs, getAll}) => {
+        var storageDocs = await AsyncStorage.getItem(fieldName)
+        storageDocs = JSON.parse(storageDocs) || {}
 
-        loadDatabase(lastModified, socket, true)
+        docs.forEach((doc) => {
+            if (fieldName == "modules")
+                doc.modId = doc._id
+
+            addToStore(fieldName, doc)
+            storageDocs[doc._id] = doc
+        })
+
+        // if (fieldName == "modules")
+        //     console.log("storageDocs", storageDocs)
+
+        AsyncStorage.setItem(fieldName, JSON.stringify(storageDocs))
+        AsyncStorage.setItem(fieldName + "LastModified", new Date().toJSON())
+
+        if (getAll)
+            store.dispatch(appLoadState(fieldName, true))
     })
 
-    socket.on("added", ({fieldName, docs}) => addToStore(fieldName, docs))
     socket.on("removed", ({fieldName, modId}) => {
         if (fieldName == "modules") {
             store.dispatch(modDeleteModule(modId))

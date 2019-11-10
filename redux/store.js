@@ -11,7 +11,15 @@ export default store = createStore(reducer, {
         isAppInitialized: false,
         isAppLoaded: false,
 
-        statusString: ""
+        statusString: "",
+
+        loadStates: {
+            modules: false,
+            modTypes: false,
+            modFields: false,
+            modValues: false,
+            presets: false
+        }
     },
 
     serverData: {
@@ -26,6 +34,7 @@ export default store = createStore(reducer, {
     modFields: {},
     modTypes: {},
     modValues: {},
+    presets: {},
 },
 
 devToolsEnhancer({

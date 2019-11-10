@@ -3,7 +3,7 @@ import { actionTypes } from "./actions";
 // -----------------------
 // Reducers
 
-function appInitialize(appStatus = {}, action) {
+function appStatus(appStatus = {}, action) {
     switch (action.type) {
 
         case actionTypes.APP_INITIALIZE:
@@ -12,10 +12,30 @@ function appInitialize(appStatus = {}, action) {
                 isAppInitialized: action.isAppInitialized
             }
 
-        case actionTypes.APP_LOAD:
+        case actionTypes.APP_LOAD_STATE:
+            var loadStates = {
+                ...appStatus.loadStates,
+                [action.loadState]: action.state
+            }
+
+            const loaded = Object.values(loadStates).reduce((loaded, loadState) => loaded && loadState, true)
+
             return {
                 ...appStatus,
-                isAppLoaded: action.isAppLoaded
+
+                isAppLoaded: loaded,
+                loadStates: loadStates
+            }
+
+        case actionTypes.APP_LOAD_ALL_STATES:
+            const keys = Object.keys(appStatus.loadStates)
+            loadStates = keys.reduce((prev, current) => ({...prev, [current]: action.state}), {})
+
+            return {
+                ...appStatus,
+
+                isAppLoaded: action.state,
+                loadStates: loadStates
             }
     }
 
@@ -128,10 +148,26 @@ function modValues(modValues = {}, action) {
     return modValues
 }
 
+
+// ------------------------------------------------------------
+// Presets
+
+function presets(presets = {}, action) {
+    switch (action.type) {
+
+        case actionTypes.PRESET_ADD:
+            return {
+                ...presets,
+                [action.preset._id]: action.preset
+            }
+    }
+
+    return presets
+}
 export function reducer(state = {}, action) {
     return {
         ...state,
-        appStatus: appInitialize(state.appStatus, action),
+        appStatus: appStatus(state.appStatus, action),
 
         serverData: serverData(state.serverData, action),
 
@@ -139,5 +175,7 @@ export function reducer(state = {}, action) {
         modFields: modFields(state.modFields, action),
         modTypes: modTypes(state.modTypes, action),
         modValues: modValues(state.modValues, action),
+
+        presets: presets(state.presets, action),
     }
 }

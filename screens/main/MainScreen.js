@@ -15,13 +15,14 @@ import ServerStatus from '../../elements/ServerStatus';
 import Module from '../../elements/Module';
 import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import { socketGlobal } from '../../network/socket';
-import { appLoad } from '../../redux/actions';
+import { appLoadAllStates, presetAdd } from '../../redux/actions';
 
 export default class MainScreen extends React.PureComponent {
     constructor(props) {
         super(props)
     
         this.refresh = this.refresh.bind(this)
+        this.savePreset = this.savePreset.bind(this)
     }
 
     static mapStateToProps = (state) => {
@@ -33,7 +34,8 @@ export default class MainScreen extends React.PureComponent {
 
     static mapDispatchToProps = (dispatch) => {
         return {
-            deloadApp: () => dispatch(appLoad(false)),
+            deloadApp: () => dispatch(appLoadAllStates(false)),
+            // addPreset: (modTypeCodename, values) => dispatch(presetAdd(modTypeCodename, values)),
         }
     }
 
@@ -48,12 +50,24 @@ export default class MainScreen extends React.PureComponent {
         socketGlobal.emit("forceReload")
     }
 
+    savePreset(modType, modValues) {
+        var values = {}
+        modType.fields.forEach((codename) => values[codename] = modValues[codename])
+
+        console.log("Saving preset values", values)
+
+        socketGlobal.emit("addPreset", {
+            modType: modType.codename,
+            values: values
+        })
+    }
+
     // componentDidMount() {
     //     this.props.navigation.navigate("Module", {mod: {modId: "5dc72897654fd7639d4a2d90", modAddress: 1, modName: "Biurko", modType: "LED-RGB"}})
     // }
 
     render() {
-        console.log("MainScreen rerender")
+        // console.log("MainScreen rerender")
 
         return <ScrollView refreshControl={<RefreshControl colors={["#4CAF50"]} refreshing={!this.props.isAppLoaded} onRefresh={this.refresh}/>}>
             <View style={styles.container}>
@@ -68,6 +82,7 @@ export default class MainScreen extends React.PureComponent {
                         renderItem={({ item }) => <Module
                             mod={item}
                             openModule={() => this.props.navigation.navigate("Module", {mod: item})}
+                            savePreset={(modType, modValues) => this.savePreset(modType, modValues)}
                         />}
                     />
                 </View>

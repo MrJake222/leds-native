@@ -32,7 +32,7 @@ class Module extends React.Component {
 
         // console.log("modValues", this.props.modValues);
         
-        return <TouchableWithoutFeedback onPress={this.props.openModule}>
+        return <TouchableWithoutFeedback onPress={this.props.openModule} onLongPress={() => this.props.savePreset(modType, modValues)}>
                 <View>
                     <CardView
                         style={styles.container}

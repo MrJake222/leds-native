@@ -1,26 +1,24 @@
 import { AsyncStorage } from 'react-native'
-import { modAddValues, modAddType, modAddModule, modAddField, appLoad } from '../redux/actions';
+import { modAddValues, modAddType, modAddModule, modAddField, appLoad, presetAdd, appLoadState } from '../redux/actions';
 
 /**
  * Reads up last modification date from AsyncStorage and loads
  * modules, presets etc. from AsyncStorage or from the server.
- * 
  */
-export default async function loadDatabase(lastModified, socket, force = false) {
+export async function loadDatabase(lastModified, socket, force = false) {
     loadState = 0
 
     lastModified.forEach(async ({fieldName, lastModified}) => {
         var lastModifiedClient = new Date(await AsyncStorage.getItem(fieldName + "LastModified"))
 
-        if (fieldName=="modules") {
-            console.log("lastModifiedClient", lastModifiedClient)
-            console.log("lastModified", lastModified)
-        }
+        // if (fieldName=="modules") {
+        //     console.log("lastModifiedClient", lastModifiedClient)
+        //     console.log("lastModified", lastModified)
+        // }
 
         if (new Date(lastModified) > lastModifiedClient || force) {
+            // if (fieldName == "modules")
             console.log(fieldName + " from server")
-
-            AsyncStorage.setItem(fieldName + "LastModified", lastModified)
 
             socket.emit("getAll", {
                 fieldName: fieldName
@@ -28,37 +26,46 @@ export default async function loadDatabase(lastModified, socket, force = false) 
         }
 
         else {
-            // console.log(fieldName + " from client")
-
             var docs = await AsyncStorage.getItem(fieldName)
             docs = JSON.parse(docs)
 
-            addToStore(fieldName, docs)
+            // if (fieldName == "modules") {
+                // console.log(fieldName + " from client")
+                // console.log("docs", docs)
+            // }
+
+            Object.values(docs).forEach((doc) => addToStore(fieldName, doc))
+
+            store.dispatch(appLoadState(fieldName, true))
         }
     })
 }
 
-export var loadState = 0
+/**
+ * Stores actionCreators for @see addToStore
+ */
+const actionCreators = {
+    modules: modAddModule,
+    modTypes: modAddType,
+    modFields: modAddField,
+    modValues: modAddValues,
 
-export function addToStore(fieldName, docs) {
-    var actionCreator = null
+    presets: presetAdd
+}
 
-    switch (fieldName) {
-        case "modules":     actionCreator = modAddModule;   loadState++; break
-        case "modTypes":    actionCreator = modAddType;     loadState++; break
-        case "modFields":   actionCreator = modAddField;    loadState++; break
-        case "modValues":   actionCreator = modAddValues;   loadState++; break
-    }
+/**
+ * Handles adding ONE element to store only.
+ * Document should be properly formatted for ex. {_id: data}
+ * Does not handle AsyncStorage insertion
+ * 
+ * @param {*} fieldName Name of field
+ * @param {*} doc Elements data in {_id: data} format
+ */
+export function addToStore(fieldName, doc) {
+    var actionCreator = actionCreators[fieldName]
 
     if (actionCreator) {
-        docs.forEach((doc) => {
-            store.dispatch(actionCreator(doc))
-
-            AsyncStorage.setItem(fieldName, JSON.stringify(docs))
-        })
-
-        if (loadState == 4)
-            store.dispatch(appLoad(true))
+        store.dispatch(actionCreator(doc))
     }
 
     else {

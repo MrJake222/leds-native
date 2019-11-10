@@ -3,7 +3,9 @@
 
 export const actionTypes = {
     APP_INITIALIZE: "APP_INITIALIZE",
-    APP_LOAD: "APP_LOAD",
+    // APP_LOAD: "APP_LOAD",
+    APP_LOAD_STATE: "APP_LOAD_STATE",
+    APP_LOAD_ALL_STATES: "APP_LOAD_ALL_STATES",
     APP_SET_STATUS: "APP_SET_STATUS",
 
     SERVER_UPDATE_CONFIG: "SERVER_UPDATE_CONFIG",
@@ -17,7 +19,10 @@ export const actionTypes = {
     MOD_ADD_VALUES: "MOD_ADD_VALUES",
 
     MOD_FIELD_UPDATE: "MOD_FIELD_UPDATE",
-    MOD_NAME_ADDRESS_UPDATE: "MOD_NAME_ADDRESS_UPDATE"
+    MOD_NAME_ADDRESS_UPDATE: "MOD_NAME_ADDRESS_UPDATE",
+
+    PRESET_ADD: "PRESET_ADD",
+    // PRESET_DELETE: "PRESET_DELETE",
 }
 
 // -----------------------
@@ -41,11 +46,37 @@ export function appInitialize(isAppInitialized) {
  * 
  * @param {*} isAppLoaded 
  */
-export function appLoad(isAppLoaded) {
-    return {
-        type: actionTypes.APP_LOAD,
+// export function appLoad(isAppLoaded) {
+//     return {
+//         type: actionTypes.APP_LOAD,
 
-        isAppLoaded: isAppLoaded
+//         isAppLoaded: isAppLoaded
+//     }
+// }
+
+/**
+ * Changes the load state
+ * 
+ * @param {*} loadState 
+ * @param {*} state 
+ */
+export function appLoadState(loadState, state) {
+    return {
+        type: actionTypes.APP_LOAD_STATE,
+
+        loadState: loadState,
+        state: state
+    }
+}
+
+/**
+ * Changes all load states
+ */
+export function appLoadAllStates(state) {
+    return {
+        type: actionTypes.APP_LOAD_ALL_STATES,
+
+        state: state
     }
 }
 
@@ -94,11 +125,6 @@ export function serverUpdateConnectionStatus(connected, connectionStatus) {
  * @param {*} moduleObj Module data in an object
  */
 export function modAddModule(moduleObj) {
-    if (moduleObj._id) {
-        moduleObj.modId = moduleObj._id
-        moduleObj._id = undefined
-    }
-
     return {
         type: actionTypes.MOD_ADD_MODULE,
 
@@ -202,3 +228,14 @@ export function modFieldUpdate(modId, fieldCodename, fieldValue) {
     }
 }
 
+
+// ------------------------------------------------------------
+// Presets
+
+export function presetAdd(preset) {
+    return {
+        type: actionTypes.PRESET_ADD,
+
+        preset: preset
+    }
+}
