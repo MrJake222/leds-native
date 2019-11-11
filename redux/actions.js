@@ -6,6 +6,7 @@ export const actionTypes = {
     // APP_LOAD: "APP_LOAD",
     APP_LOAD_STATE: "APP_LOAD_STATE",
     APP_LOAD_ALL_STATES: "APP_LOAD_ALL_STATES",
+    APP_CLEAR_DATA: "APP_CLEAR_DATA",
     APP_SET_STATUS: "APP_SET_STATUS",
 
     SERVER_UPDATE_CONFIG: "SERVER_UPDATE_CONFIG",
@@ -22,7 +23,7 @@ export const actionTypes = {
     MOD_NAME_ADDRESS_UPDATE: "MOD_NAME_ADDRESS_UPDATE",
 
     PRESET_ADD: "PRESET_ADD",
-    // PRESET_DELETE: "PRESET_DELETE",
+    PRESET_DELETE: "PRESET_DELETE",
 }
 
 // -----------------------
@@ -77,6 +78,15 @@ export function appLoadAllStates(state) {
         type: actionTypes.APP_LOAD_ALL_STATES,
 
         state: state
+    }
+}
+
+/**
+ * Clears all fields
+ */
+export function appClearData() {
+    return {
+        type: actionTypes.APP_CLEAR_DATA,
     }
 }
 
@@ -237,5 +247,13 @@ export function presetAdd(preset) {
         type: actionTypes.PRESET_ADD,
 
         preset: preset
+    }
+}
+
+export function presetDelete(id) {
+    return {
+        type: actionTypes.PRESET_DELETE,
+
+        id: id
     }
 }

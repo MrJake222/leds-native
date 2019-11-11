@@ -32,20 +32,18 @@ class Module extends React.Component {
 
         // console.log("modValues", this.props.modValues);
         
-        return <TouchableWithoutFeedback onPress={this.props.openModule} onLongPress={() => this.props.savePreset(modType, modValues)}>
-                <View>
-                    <CardView
-                        style={styles.container}
-                        indicator={getIndicator(modType)}
-                        indicatorHeight="8"
-                        indicatorData={modValues}
-                        contentStyles={styles.contents}>
-                        
-                            <Text style={styles.address}>{leadingZero(modAddress)}</Text>
-                            <Text style={styles.name}>{modName}</Text>
-                </CardView>
-            </View>
-        </TouchableWithoutFeedback>
+        return <CardView
+            style={styles.container}
+            indicator={getIndicator(modType)}
+            indicatorHeight="8"
+            indicatorData={modValues}
+            contentStyles={styles.contents}
+            onPress={this.props.openModule}
+            onLongPress={() => this.props.savePreset(modType, modValues)}>
+            
+                <Text style={styles.address}>{leadingZero(modAddress)}</Text>
+                <Text style={styles.name}>{modName}</Text>
+        </CardView>
     }
 }
 

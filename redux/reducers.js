@@ -77,7 +77,7 @@ function modules(modules = {}, action) {
             
             return removed
 
-        case actionTypes.MOD_CLEAR_MODULES:
+        case actionTypes.APP_CLEAR_DATA:
             return {}
 
         case actionTypes.MOD_NAME_ADDRESS_UPDATE:
@@ -105,6 +105,9 @@ function modFields(modFields = {}, action) {
                 ...modFields,
                 [action.field.codename]: action.field
             }
+
+        case actionTypes.APP_CLEAR_DATA:
+            return {}
     }
 
     return modFields
@@ -118,6 +121,9 @@ function modTypes(modTypes = {}, action) {
                 ...modTypes,
                 [action.modType.codename]: action.modType
             }
+
+        case actionTypes.APP_CLEAR_DATA:
+            return {}
 
     }
 
@@ -143,6 +149,9 @@ function modValues(modValues = {}, action) {
                 }
             }
 
+        case actionTypes.APP_CLEAR_DATA:
+            return {}
+
     }
 
     return modValues
@@ -160,10 +169,20 @@ function presets(presets = {}, action) {
                 ...presets,
                 [action.preset._id]: action.preset
             }
+
+        case actionTypes.PRESET_DELETE:
+            const { [action.id]: value, ...removed } = presets
+            
+            return removed
+
+        case actionTypes.APP_CLEAR_DATA:
+            return {}
     }
 
     return presets
 }
+
+
 export function reducer(state = {}, action) {
     return {
         ...state,

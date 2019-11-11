@@ -11,7 +11,7 @@ export default class Field extends React.Component {
     render() {
         ({name, codename, type, maxValue} = this.props.field)
 
-        console.log("Field rerender", name)
+        // console.log("Field rerender", name)
 
         switch (type) {
             case "smooth":

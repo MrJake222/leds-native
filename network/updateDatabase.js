@@ -11,7 +11,7 @@ export async function loadDatabase(lastModified, socket, force = false) {
     lastModified.forEach(async ({fieldName, lastModified}) => {
         var lastModifiedClient = new Date(await AsyncStorage.getItem(fieldName + "LastModified"))
 
-        // if (fieldName=="modules") {
+        // if (fieldName=="presets") {
         //     console.log("lastModifiedClient", lastModifiedClient)
         //     console.log("lastModified", lastModified)
         // }
@@ -39,6 +39,16 @@ export async function loadDatabase(lastModified, socket, force = false) {
             store.dispatch(appLoadState(fieldName, true))
         }
     })
+}
+
+export async function removeFromStorarge(fieldName, _id) {
+    var storageDocs = await AsyncStorage.getItem(fieldName)
+    storageDocs = JSON.parse(storageDocs) || {}
+
+    const {[_id]: value, ...removed} = storageDocs
+
+    AsyncStorage.setItem(fieldName, JSON.stringify(removed))
+    AsyncStorage.setItem(fieldName + "LastModified", new Date().toJSON())
 }
 
 /**

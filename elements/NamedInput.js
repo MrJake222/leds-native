@@ -18,7 +18,13 @@ export default class NamedInput extends React.Component {
     render() {
         return <View style={styles.inputContainer}>
             <Text style={styles.text}>{this.props.name}</Text>
-            <TextInput style={styles.input} keyboardType={this.props.keyboardType} value={this.props.value} onChangeText={(value) => this.props.onChangeText(value)}/>
+            <TextInput
+                style={styles.input}
+                keyboardType={this.props.keyboardType}
+                value={this.props.value}
+                onChangeText={this.props.onChangeText}
+                onFocus={this.props.onFocus}
+                onBlur={this.props.onBlur} />
         </View>
     }
 }

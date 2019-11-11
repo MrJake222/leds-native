@@ -8,6 +8,7 @@ import ConnectionWrapper from "./screens/ConnectionWrapper"
 import AppConfig from "./screens/AppConfig"
 // import MainScreen from "./screens/MainScreen"
 import DrawerNavigator from "./screens/DrawerNavigator";
+import { setRootNavigatorRef } from "./RootNavigatorRef";
 
 export default class App extends React.Component {
     render() {
@@ -33,7 +34,7 @@ export default class App extends React.Component {
         )
 
         return <Provider store={store}>
-            <AppContainer />
+            <AppContainer ref={setRootNavigatorRef}/>
         </Provider>
     }
 }

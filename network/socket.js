@@ -1,7 +1,7 @@
 import SocketIOClient from 'socket.io-client'
-import { serverUpdateConnectionStatus, modDeleteModule, modClearModules, modNameAddressUpdate, modFieldUpdate, appLoadState } from '../redux/actions';
+import { serverUpdateConnectionStatus, modDeleteModule, modNameAddressUpdate, modFieldUpdate, appLoadState, presetDelete } from '../redux/actions';
 
-import { loadDatabase, loadDoc, addToStore } from './updateDatabase';
+import { loadDatabase, addToStore, removeFromStorarge } from './updateDatabase';
 import { AsyncStorage } from 'react-native'
 
 export var socketGlobal
@@ -74,9 +74,19 @@ export function initSocketIO(serverAddress, serverPort, store) {
             store.dispatch(appLoadState(fieldName, true))
     })
 
-    socket.on("removed", ({fieldName, modId}) => {
-        if (fieldName == "modules") {
-            store.dispatch(modDeleteModule(modId))
+    socket.on("removed", ({fieldName, _id}) => {
+        switch (fieldName) {
+            case "modules":
+                store.dispatch(modDeleteModule(_id))
+                break
+
+            case "presets":
+                store.dispatch(presetDelete(_id))
+                break
+
+            default:
+                removeFromStorarge(fieldName, _id)
+                break
         }
     })
 

@@ -3,7 +3,7 @@ import {
     StyleSheet,
 
     View,
-    Text
+    TouchableOpacity
 } from 'react-native'
 
 /**
@@ -18,26 +18,24 @@ import {
  */
 export default class CardView extends React.Component {
     render() {
-        return <View style={[styles.container, this.props.style]}>
+        const activeOpacity = (this.props.onPress || this.props.onLongPress) ? 0.8 : 1
+
+        return <TouchableOpacity activeOpacity={activeOpacity} style={[styles.container, this.props.style]} onPress={this.props.onPress} onLongPress={this.props.onLongPress}>
             {this.props.indicator ? <this.props.indicator height={this.props.indicatorHeight} data={this.props.indicatorData} /> : []}
 
             <View style={this.props.contentStyles}>
                 {this.props.children}
             </View>
-        </View>
+        </TouchableOpacity>
     }
 }
 
 const styles = StyleSheet.create({
     container: {
-        // flex: 1,
-        // margin: 4,
-
         borderRadius: 8,
         elevation: 6,
         backgroundColor: "white",
 
-        position: "relative",
         overflow: "hidden"
     }
 })

@@ -59,6 +59,10 @@ class ConnectionWrapper extends React.Component {
                 AsyncStorage.clear()
             }} /> */}
 
+            <Button title="Go" onPress={() => {
+                this.props.navigation.navigate("DrawerNavigator")
+            }} />
+
             {this.props.isAppInitialized ? <View style={styles.status}>
                 <FlatList
                     data={loadStateArray}

@@ -26,6 +26,7 @@ class ServerStatus extends React.PureComponent {
         // console.log("ServerStatus")
 
         return <CardView
+            style={styles.container}
             contentStyles={styles.contents} 
             indicator={IndicatorColor} 
             indicatorHeight={8} 
@@ -48,6 +49,10 @@ export default connect(mapStateToProps)(ServerStatus)
 const serverStatusColor = {hue: 0, saturation: 50, lightness: 50}
 
 const styles = StyleSheet.create({
+    container: {
+        margin: 4
+    },
+
     // CardView contents styling
     contents: {
         paddingHorizontal: 4,

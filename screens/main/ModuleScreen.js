@@ -9,8 +9,9 @@ import {
     TouchableOpacity,
     Image,
     Alert,
-    ToastAndroid
+    ToastAndroid,
 } from 'react-native'
+
 import Field from '../../elements/Field';
 import CardView from '../../elements/CardView';
 import getIndicator from '../../indicator/getIndicator';
@@ -19,6 +20,7 @@ import store from "~/redux/store"
 import { socketGlobal } from '../../network/socket';
 import NamedInput from "~/elements/NamedInput"
 import { validateModuleData, leadingZero } from '../../helpers';
+import { removeFromStorarge } from '../../network/updateDatabase';
 
 export default class ModuleScreen extends React.Component {
     static mapStateToProps = (state) => ({
@@ -42,6 +44,7 @@ export default class ModuleScreen extends React.Component {
                     navigation.goBack()
                     store.dispatch(modDeleteModule(modId))
                     socketGlobal.emit("deleteModule", { modId: modId })
+                    removeFromStorarge("modules", modId)
                 }
 
                 if (socketGlobal.connected) {
@@ -65,16 +68,18 @@ export default class ModuleScreen extends React.Component {
 
     constructor(props) {
         super(props)
-        
+
         const { modAddress, modName } = this.props.navigation.state.params.mod
 
         this.state = {
             modName: modName,
-            modAddress: modAddress.toString()
+            modAddress: modAddress.toString(),
+            presetName: ""
         }
 
         this.apply = this.apply.bind(this)
         this.updateField = this.updateField.bind(this)
+        this.addPreset = this.addPreset.bind(this)
     }
 
     apply() {
@@ -85,7 +90,7 @@ export default class ModuleScreen extends React.Component {
 
         if (socketGlobal.connected) {
 
-            if (this.state.modName != modName || this.state.modAddress != modAddress ) {
+            if (this.state.modName != modName || this.state.modAddress != modAddress) {
 
                 if (validateModuleData(this.state.modName, address, addressList, true)) {
                     this.props.updateNameAddress(modId, address, this.state.modName)
@@ -101,8 +106,8 @@ export default class ModuleScreen extends React.Component {
                             modName: this.state.modName,
                             modAddress: address
                         }
-                    })                
-                } 
+                    })
+                }
             }
 
             else {
@@ -122,10 +127,35 @@ export default class ModuleScreen extends React.Component {
             this.props.updateModField(modId, codename, value)
 
             socketGlobal.emit("updateModField", {
-                modId: modId, 
-                codename: codename, 
+                modId: modId,
+                codename: codename,
                 value: value
             })
+        }
+
+        else {
+            ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
+        }
+    }
+
+    addPreset(values) {
+        if (socketGlobal.connected) {
+
+            if (this.state.presetName != "") {
+                var { modType } = this.props.navigation.state.params.mod
+
+                socketGlobal.emit("addPreset", {
+                    presetName: this.state.presetName,
+                    modType: modType,
+                    values: values
+                })
+
+                this.props.navigation.navigate("MainScreen")
+            }
+
+            else {
+                ToastAndroid.show("Preset name cannot be empty", ToastAndroid.SHORT);
+            }
         }
 
         else {
@@ -138,7 +168,7 @@ export default class ModuleScreen extends React.Component {
         modType = this.props.modTypes[modType]
 
         const modFields = this.props.modValues[modId]
-        console.log("ModuleScreen rerender", modId, "hue: " + modFields.hue)        
+        // console.log("ModuleScreen rerender", modId, "hue: " + modFields.hue)        
 
         return <View style={styles.container}>
             <CardView
@@ -148,7 +178,7 @@ export default class ModuleScreen extends React.Component {
                 indicatorHeight="8"
                 indicatorData={modFields}>
 
-                    <Text style={styles.modType}>{modType.codename + " at " + leadingZero(modAddress)}</Text>
+                    <Text style={styles.topRight}>{modType.codename + " at " + leadingZero(modAddress)}</Text>
 
                     <FlatList
                         data={modType.fields}
@@ -163,19 +193,30 @@ export default class ModuleScreen extends React.Component {
                     />
             </CardView>
 
-            <CardView
-                style={styles.cardview}
-                contentStyle={styles.contents}>
+            <View style={styles.containerInner}>
+                <CardView
+                    style={[styles.cardviewInner, { marginRight: 6 }]}
+                    contentStyle={styles.contents}>
 
-                    <Text style={styles.modType}>Properties</Text>
+                        <Text style={styles.topRight}>Properties</Text>
 
-                    <NamedInput name="Module's name" value={this.state.modName} onChangeText={(value) => this.setState({...this.state, modName: value})}/>
-                    <NamedInput name="Module's address" value={this.state.modAddress} keyboardType="numeric" onChangeText={(value) => this.setState({...this.state, modAddress: value})}/>
-                    
-                    <View style={{width: "50%", alignSelf: "flex-end", marginTop: 6}}>
-                        <Button title="Save" color="#4CAF50" onPress={this.apply}/>
-                    </View>
-            </CardView>
+                        <NamedInput name="Module's name" value={this.state.modName} onChangeText={(value) => this.setState({ ...this.state, modName: value })} />
+                        <NamedInput name="Module's address" value={this.state.modAddress} keyboardType="numeric" onChangeText={(value) => this.setState({ ...this.state, modAddress: value })} />
+
+                        <Button style={{ marginTop: 6 }} title="Save" color="#4CAF50" onPress={this.apply} />
+                </CardView>
+
+                <CardView
+                    style={[styles.cardviewInner, { marginLeft: 6 }]}
+                    contentStyle={styles.contents}>
+
+                        <Text style={styles.topRight}>Add preset</Text>
+
+                        <NamedInput name="Preset's name" value={this.state.presetName} onChangeText={(value) => this.setState({ ...this.state, presetName: value })} />
+
+                        <Button style={{ marginTop: 6 }} title="Create preset" color="#4CAF50" onPress={() => this.addPreset(modFields)} />
+                </CardView>
+            </View>
         </View>
     }
 }
@@ -185,12 +226,21 @@ const styles = StyleSheet.create({
         marginHorizontal: 8,
         marginVertical: 4,
 
-        // flex: 1,
-        // justifyContent: "center"
+        flex: 1,
     },
 
     cardview: {
         marginBottom: 12
+    },
+
+    containerInner: {
+        flex: 1,
+        flexDirection: "row"
+    },
+
+    cardviewInner: {
+        flex: 1,
+        alignSelf: "flex-start"
     },
 
     contents: {
@@ -198,7 +248,7 @@ const styles = StyleSheet.create({
         paddingVertical: 2,
     },
 
-    modType: {
+    topRight: {
         position: "absolute",
         top: 2,
         right: 3,
