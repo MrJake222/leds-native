@@ -37,6 +37,37 @@ function appStatus(appStatus = {}, action) {
                 isAppLoaded: action.state,
                 loadStates: loadStates
             }
+
+        case actionTypes.APP_SELECT_PRESET:
+            return {
+                ...appStatus,
+
+                selectedPreset: action.preset
+            }
+        
+        case actionTypes.APP_SELECT_MODULE:
+            return {
+                ...appStatus,
+
+                selectedModules: [
+                    ...appStatus.selectedModules,
+                    action.modId
+                ]
+            }
+
+        case actionTypes.APP_DESELECT_MODULE:            
+            return {
+                ...appStatus,
+
+                selectedModules: appStatus.selectedModules.filter((modId) => modId != action.modId),
+            }
+
+        case actionTypes.APP_DESELECT_ALL_MODULES:
+            return {
+                ...appStatus,
+
+                selectedModules: []
+            }
     }
 
     return appStatus

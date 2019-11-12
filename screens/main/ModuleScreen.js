@@ -144,6 +144,10 @@ export default class ModuleScreen extends React.Component {
             if (this.state.presetName != "") {
                 var { modType } = this.props.navigation.state.params.mod
 
+                values = {...values}
+                delete values._id
+                delete values.modId
+
                 socketGlobal.emit("addPreset", {
                     presetName: this.state.presetName,
                     modType: modType,

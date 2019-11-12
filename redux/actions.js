@@ -7,6 +7,11 @@ export const actionTypes = {
     APP_LOAD_STATE: "APP_LOAD_STATE",
     APP_LOAD_ALL_STATES: "APP_LOAD_ALL_STATES",
     APP_CLEAR_DATA: "APP_CLEAR_DATA",
+    APP_SELECT_PRESET: "APP_SELECT_PRESET",
+    APP_SELECT_MODULE: "APP_SELECT_MODULE",
+    APP_DESELECT_MODULE: "APP_DESELECT_MODULE",
+    APP_DESELECT_ALL_MODULES: "APP_DESELECT_ALL_MODULES",
+
     APP_SET_STATUS: "APP_SET_STATUS",
 
     SERVER_UPDATE_CONFIG: "SERVER_UPDATE_CONFIG",
@@ -34,26 +39,13 @@ export const actionTypes = {
  * 
  * @param {*} isAppInitialized 
  */
-export function appInitialize(isAppInitialized) {
-    return {
-        type: actionTypes.APP_INITIALIZE,
+export const appInitialize = (isAppInitialized) => ({
 
-        isAppInitialized: isAppInitialized
-    }
-}
+    type: actionTypes.APP_INITIALIZE,
 
-/**
- * Called when all 4 module related fields are loaded
- * 
- * @param {*} isAppLoaded 
- */
-// export function appLoad(isAppLoaded) {
-//     return {
-//         type: actionTypes.APP_LOAD,
+    isAppInitialized: isAppInitialized
 
-//         isAppLoaded: isAppLoaded
-//     }
-// }
+})
 
 /**
  * Changes the load state
@@ -61,42 +53,56 @@ export function appInitialize(isAppInitialized) {
  * @param {*} loadState 
  * @param {*} state 
  */
-export function appLoadState(loadState, state) {
-    return {
-        type: actionTypes.APP_LOAD_STATE,
+export const appLoadState = (loadState, state) => ({
+    type: actionTypes.APP_LOAD_STATE,
 
-        loadState: loadState,
-        state: state
-    }
-}
+    loadState: loadState,
+    state: state
+})
 
 /**
  * Changes all load states
  */
-export function appLoadAllStates(state) {
-    return {
-        type: actionTypes.APP_LOAD_ALL_STATES,
+export const appLoadAllStates = (state) => ({
+    type: actionTypes.APP_LOAD_ALL_STATES,
 
-        state: state
-    }
-}
+    state: state
+})
 
 /**
  * Clears all fields
  */
-export function appClearData() {
-    return {
-        type: actionTypes.APP_CLEAR_DATA,
-    }
-}
+export const appClearData = () => ({
+    type: actionTypes.APP_CLEAR_DATA,
+})
 
-export function appSetStatus(statusString) {
-    return {
-        type: actionTypes.APP_SET_STATUS,
+export const appSelectPreset = (preset) => ({
+    type: actionTypes.APP_SELECT_PRESET,
 
-        statusString: statusString
-    }
-}
+    preset: preset
+})
+
+export const selectModule = (modId) => ({
+    type: actionTypes.APP_SELECT_MODULE,
+    
+    modId: modId
+})
+
+export const deselectModule = (modId) => ({
+    type: actionTypes.APP_DESELECT_MODULE,
+
+    modId: modId
+})
+
+export const deselectAllModules = () => ({
+    type: actionTypes.APP_DESELECT_ALL_MODULES
+})
+
+export const appSetStatus = (statusString) => ({
+    type: actionTypes.APP_SET_STATUS,
+
+    statusString: statusString
+})
 
 /**
  * Generates action to configure an app. 
@@ -105,14 +111,12 @@ export function appSetStatus(statusString) {
  * @param {*} serverAddress Server's address
  * @param {*} serverPort Server's port
  */
-export function serverUpdateConfig(serverAddress, serverPort) {
-    return {
-        type: actionTypes.SERVER_UPDATE_CONFIG,
+export const serverUpdateConfig = (serverAddress, serverPort) => ({
+    type: actionTypes.SERVER_UPDATE_CONFIG,
 
-        serverAddress: serverAddress,
-        serverPort: serverPort
-    }
-}
+    serverAddress: serverAddress,
+    serverPort: serverPort
+})
 
 /**
  * Update connection status shown on the right
@@ -120,90 +124,77 @@ export function serverUpdateConfig(serverAddress, serverPort) {
  * @param {*} connected True if connected to the server
  * @param {*} connectionStatus Status string
  */
-export function serverUpdateConnectionStatus(connected, connectionStatus) {
-    return {
-        type: actionTypes.SERVER_UPDATE_CONNECTION_STATUS,
+export const serverUpdateConnectionStatus = (connected, connectionStatus) => ({
+    type: actionTypes.SERVER_UPDATE_CONNECTION_STATUS,
 
-        connected: connected,
-        connectionStatus: connectionStatus
-    }
-}
+    connected: connected,
+    connectionStatus: connectionStatus
+
+})
 
 /**
  * Adds a module. Should be called last to avoid errors.
  * 
  * @param {*} moduleObj Module data in an object
  */
-export function modAddModule(moduleObj) {
-    return {
-        type: actionTypes.MOD_ADD_MODULE,
+export const modAddModule = (moduleObj) => ({
+    type: actionTypes.MOD_ADD_MODULE,
 
-        module: moduleObj
-    }
-}
+    module: moduleObj
+})
 
 /**
  * Delete module
  * 
  * @param {*} modId 
  */
-export function modDeleteModule(modId) {
-    return {
-        type: actionTypes.MOD_DELETE_MODULE,
+export const modDeleteModule = (modId) => ({
+    type: actionTypes.MOD_DELETE_MODULE,
 
-        modId: modId
-    }
-}
+    modId: modId
+})
 
 /**
  * Clear all modules
  * 
  * @param {*} modId 
  */
-export function modClearModules() {
-    return {
-        type: actionTypes.MOD_CLEAR_MODULES,
-    }
-}
+export const modClearModules = () => ({
+    type: actionTypes.MOD_CLEAR_MODULES,
+})
 
 /**
- * Add a module's field(a single prop, like Hue for ex.)
+ * Add a module's field = (a single prop, like Hue for ex.)
  * 
  * @param {*} field Field's data
  */
-export function modAddField(field) {
-    return {
-        type: actionTypes.MOD_ADD_FIELD,
+export const modAddField = (field) => ({
+    type: actionTypes.MOD_ADD_FIELD,
 
-        field: field
-    }
-}
+    field: field
+})
 
 /**
  * Add module type. Like LED-RGB for ex.
  * 
  * @param {*} modType 
  */
-export function modAddType(modType) {
-    return {
-        type: actionTypes.MOD_ADD_TYPE,
+export const modAddType = (modType) => ({
+    type: actionTypes.MOD_ADD_TYPE,
 
-        modType: modType
-    }
-}
+    modType: modType
+})
 
 /**
  * Adds values based on modId.
  * 
  * @param {*} modValues 
  */
-export function modAddValues(modValues) {
-    return {
-        type: actionTypes.MOD_ADD_VALUES,
+export const modAddValues = (modValues) => ({
+    type: actionTypes.MOD_ADD_VALUES,
 
-        modValues: modValues
-    }
-}
+    modValues: modValues
+})
 
 /**
  * Updates module data
@@ -211,15 +202,13 @@ export function modAddValues(modValues) {
  * @param {*} modName Module's new name 
  * @param {*} modAddress Module's new address
  */
-export function modNameAddressUpdate(modId, modAddress, modName) {
-    return {
-        type: actionTypes.MOD_NAME_ADDRESS_UPDATE,
+export const modNameAddressUpdate = (modId, modAddress, modName) => ({
+    type: actionTypes.MOD_NAME_ADDRESS_UPDATE,
 
-        modId: modId,
-        modAddress: modAddress,
-        modName: modName
-    }
-}
+    modId: modId,
+    modAddress: modAddress,
+    modName: modName
+})
 
 /**
  * Generates action to update single field of a Module.
@@ -228,32 +217,26 @@ export function modNameAddressUpdate(modId, modAddress, modName) {
  * @param {*} fieldCodename Field's codename
  * @param {*} fieldValue Field's value to be applied
  */
-export function modFieldUpdate(modId, fieldCodename, fieldValue) {
-    return {
-        type: actionTypes.MOD_FIELD_UPDATE,
-        
-        modId: modId,
-        fieldCodename: fieldCodename,
-        fieldValue: fieldValue
-    }
-}
+export const modFieldUpdate = (modId, fieldCodename, fieldValue) => ({
+    type: actionTypes.MOD_FIELD_UPDATE,
+
+    modId: modId,
+    fieldCodename: fieldCodename,
+    fieldValue: fieldValue
+})
 
 
 // ------------------------------------------------------------
 // Presets
 
-export function presetAdd(preset) {
-    return {
-        type: actionTypes.PRESET_ADD,
+export const presetAdd = (preset) => ({
+    type: actionTypes.PRESET_ADD,
 
-        preset: preset
-    }
-}
+    preset: preset
+})
 
-export function presetDelete(id) {
-    return {
-        type: actionTypes.PRESET_DELETE,
+export const presetDelete = (id) => ({
+    type: actionTypes.PRESET_DELETE,
 
-        id: id
-    }
-}
+    id: id
+})

@@ -13,13 +13,27 @@ export default store = createStore(reducer, {
 
         statusString: "",
 
+        /**
+         * Indicates if app loaded given prop
+         */
         loadStates: {
             modules: false,
             modTypes: false,
             modFields: false,
             modValues: false,
             presets: false
-        }
+        },
+
+        /**
+         * If user is applying preset, this holds the reference to it.
+         * If not, must be null.
+         */
+        selectedPreset: null,
+
+        /**
+         * Array of selected modules for preset apply
+         */
+        selectedModules: []
     },
 
     serverData: {

@@ -2,38 +2,41 @@ import React from 'react'
 
 import {
     StyleSheet,
-    AsyncStorage,
 
     View,
     FlatList,
     Image,
-    Button,
     RefreshControl,
-    Text
+    Text,
+    BackHandler,
+    ToastAndroid
 } from 'react-native'
 
 import ServerStatus from '../../elements/ServerStatus';
 import Module from '../../elements/Module';
 import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import { socketGlobal } from '../../network/socket';
-import { appLoadAllStates, presetAdd, presetDelete, appClearData } from '../../redux/actions';
+import { appLoadAllStates, presetAdd, appClearData, deselectAllModules, appSelectPreset } from '../../redux/actions';
 import Preset from '../../elements/Preset';
 import { rootNavigatorNavigate } from '../../RootNavigatorRef';
-import { removeFromStorarge } from '../../network/updateDatabase';
 
 export default class MainScreen extends React.PureComponent {
     constructor(props) {
         super(props)
 
         this.refresh = this.refresh.bind(this)
-        this.savePreset = this.savePreset.bind(this)
+        this.applyPreset = this.applyPreset.bind(this)
+        this.deselectPreset = this.deselectPreset.bind(this)
     }
 
     static mapStateToProps = (state) => {
         return {
             isAppLoaded: state.appStatus.isAppLoaded,
+            selectedPreset: state.appStatus.selectedPreset,
+            selectedModules: state.appStatus.selectedModules,
+
             modules: state.modules,
-            presets: state.presets
+            presets: state.presets,
         }
     }
 
@@ -42,15 +45,24 @@ export default class MainScreen extends React.PureComponent {
             deloadApp: () => dispatch(appLoadAllStates(false)),
             clearData: () => dispatch(appClearData()),
             addPreset: (modTypeCodename, values) => dispatch(presetAdd(modTypeCodename, values)),
-            deletePreset: (id) => dispatch(presetDelete(id)),
+            selectPreset: (preset) => dispatch(appSelectPreset(preset)),
+            deselectAllModules: () => dispatch(deselectAllModules()),
         }
     }
 
-    static addIcon = (navigation) => (
-        <TouchableOpacity activeOpacity={0.5} onPress={() => navigation.navigate("AddModule")}>
-            <Image source={require("../../assets/add.png")} resizeMode="center" tintColor="#FFF" style={{ height: "100%", width: 30, marginRight: 8 }} />
+    static addIcon = (navigation) => {
+        let onPress = () => navigation.navigate("AddModule")
+        let source = require("../../assets/add.png")
+
+        if (navigation.state.params && navigation.state.params.presetMode) {
+            onPress = navigation.state.params.applyPreset
+            source = require("~/assets/apply.png")
+        }
+
+        return <TouchableOpacity activeOpacity={0.5} onPress={onPress}>
+            <Image source={source} resizeMode="center" tintColor="#FFF" style={{ height: "100%", width: 30, marginRight: 8 }} />
         </TouchableOpacity>
-    )
+    }
 
     refresh() {
         this.props.deloadApp()
@@ -60,15 +72,43 @@ export default class MainScreen extends React.PureComponent {
         socketGlobal.emit("forceReload")
     }
 
-    savePreset(modType, modValues) {
-        var values = {}
-        modType.fields.forEach((codename) => values[codename] = modValues[codename])
+    applyPreset() {
+        const { presetName } = this.props.selectedPreset
+        const modules = this.props.selectedModules
 
-        // console.log("Saving preset values", values)
+        if (socketGlobal.connected){
+            ToastAndroid.show("Applying preset " + presetName + " to " + modules.length + " modules", ToastAndroid.SHORT)
+        }
 
-        socketGlobal.emit("addPreset", {
-            modType: modType.codename,
-            values: values
+        else {
+            ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
+        }
+        
+        this.deselectPreset()
+    }
+
+    deselectPreset() {
+        this.props.selectPreset(null)
+        this.props.deselectAllModules()
+
+        this.props.navigation.setParams({
+            headerTitle: null,
+            presetMode: false
+        })
+    }
+
+    componentDidMount() {
+        this.props.navigation.setParams({
+            applyPreset: this.applyPreset
+        })
+
+        BackHandler.addEventListener("hardwareBackPress", () => {
+            if (this.props.selectedPreset) {
+                this.deselectPreset()
+                return true
+            }
+
+            return false
         })
     }
 
@@ -79,7 +119,7 @@ export default class MainScreen extends React.PureComponent {
             <View style={styles.container}>
                 {/* Contains module definitions */}
                 <View style={styles.modules}>
-                    <Button title="Clear AsyncStorage" onPress={() => AsyncStorage.clear()} />
+                    {/* <Button style={{zIndex: 0}} title="Clear AsyncStorage" onPress={() => AsyncStorage.clear()} /> */}
 
                     <FlatList
                         contentContainerStyle={{ flex: 1 }}
@@ -89,7 +129,6 @@ export default class MainScreen extends React.PureComponent {
                         renderItem={({ item }) => <Module
                             mod={item}
                             openModule={() => this.props.navigation.navigate("Module", { mod: item })}
-                            savePreset={(modType, modValues) => this.savePreset(modType, modValues)}
                         />}
                     />
                 </View>
@@ -109,16 +148,12 @@ export default class MainScreen extends React.PureComponent {
 
                             renderItem={({ item }) => <Preset
                                 preset={item}
-                                deletePreset={() => {
-                                    if (socketGlobal.connected) {
-                                        socketGlobal.emit("deletePreset", { _id: item._id })
-                                        this.props.deletePreset(item._id)
-                                        removeFromStorarge("presets", item._id)
-                                    }
-
-                                    else {
-                                        ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
-                                    }
+                                
+                                setPresetMode={() => {
+                                    this.props.navigation.setParams({
+                                        headerTitle: "Apply preset " + item.presetName,
+                                        presetMode: true
+                                    })
                                 }}
                             />}
                         />
@@ -134,18 +169,18 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: "row",
+        // backgroundColor: "rgba(52, 52, 52, 0.8)",
+        // zIndex: 100
     },
 
     // Contains module definitions
     modules: {
-        flex: 2,
+        flex: 2
     },
 
     // Status pane
     status: {
-        flex: 1,
-
-        // padding: 4,
+        flex: 1
     },
 
     imageContainer: {

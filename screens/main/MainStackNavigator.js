@@ -21,11 +21,18 @@ export default class MainStackNavigator extends React.Component {
             createStackNavigator({
                 MainScreen: {
                     screen: connect(MainScreen.mapStateToProps, MainScreen.mapDispatchToProps)(MainScreen),
-                    navigationOptions: ({navigation}) => ({
-                        title: "Modules",
-                        headerRight: MainScreen.addIcon(navigation),
-                        ...headerStyles
-                    })
+                    navigationOptions: ({navigation}) => {
+                        var title = "Modules"
+
+                        if (navigation.state.params && navigation.state.params.headerTitle)
+                            title = navigation.state.params.headerTitle
+
+                        return {
+                            title: title,
+                            headerRight: MainScreen.addIcon(navigation),
+                            ...headerStyles
+                        }
+                    }
                 },
 
                 Module: {
