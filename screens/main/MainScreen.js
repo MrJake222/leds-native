@@ -169,8 +169,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         flexDirection: "row",
-        // backgroundColor: "rgba(52, 52, 52, 0.8)",
-        // zIndex: 100
     },
 
     // Contains module definitions

@@ -73,11 +73,8 @@ class Module extends React.Component {
                     else if (selected)
                         this.props.deselectModule(modId)
 
-                    else {
-                        // console.log("selecting", modId)                        
-
+                    else
                         this.props.selectModule(modId)
-                    }
                 }
 
                 else {
@@ -96,9 +93,7 @@ export default connect(mapStateToProps, mapDispatchToProps)(Module)
 const styles = StyleSheet.create({
     container: {
         marginHorizontal: 8,
-        marginVertical: 4,
-
-        // backgroundColor: "rgba(52, 52, 52, 0.2)"
+        marginVertical: 4
     },
 
     contents: {
