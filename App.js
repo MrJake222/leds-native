@@ -1,7 +1,6 @@
 import React from "react"
 import { Provider, connect } from 'react-redux'
 import { createAppContainer, createSwitchNavigator } from "react-navigation"
-import { fromLeft } from 'react-navigation-transitions'
 
 import store from "./redux/store"
 import ConnectionWrapper from "./screens/ConnectionWrapper"
@@ -28,8 +27,7 @@ export default class App extends React.Component {
             },
             
             {
-                initialRouteName: "ConnectionWrapper",
-                transitionConfig: () => fromLeft()
+                initialRouteName: "ConnectionWrapper"
             })
         )
 

@@ -13,8 +13,6 @@ import { createDrawerNavigator, DrawerItems } from 'react-navigation-drawer';
 import MainStackNavigator from './main/MainStackNavigator';
 import AdminNavigator from './admin/AdminNavigator';
 
-import Constants from "expo-constants"
-
 export default class DrawerNavigator extends React.Component {
     render() {
         const AppContainer = createAppContainer(
@@ -52,7 +50,7 @@ const styles = StyleSheet.create({
 
     header: {
         flex: 1,
-        paddingTop: Constants.statusBarHeight,
+        // paddingTop: Constants.statusBarHeight,
 
         backgroundColor: "#4CAF50",
         // justifyContent: "center"
