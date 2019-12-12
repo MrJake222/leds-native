@@ -97,6 +97,10 @@ export function initSocketIO(serverAddress, serverPort, store) {
     socket.on("updateModField", ({modId, codename, value}) => {
         store.dispatch(modFieldUpdate(modId, codename, value))
     })
+
+    socket.on("updateMultipleModFields", ({modId, values}) => {
+        Object.keys(values).forEach((codename) => store.dispatch(modFieldUpdate(modId, codename, values[codename])))
+    })
     
     socket.connect()
 }

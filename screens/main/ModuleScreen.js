@@ -69,12 +69,13 @@ export default class ModuleScreen extends React.Component {
     constructor(props) {
         super(props)
 
-        const { modAddress, modName } = this.props.navigation.state.params.mod
+        const { _id, modAddress, modName } = this.props.navigation.state.params.mod
 
         this.state = {
             modName: modName,
             modAddress: modAddress.toString(),
-            presetName: ""
+            presetName: "",
+            modValues: props.modValues[_id]
         }
 
         this.apply = this.apply.bind(this)
@@ -121,13 +122,22 @@ export default class ModuleScreen extends React.Component {
     }
 
     updateField(codename, value) {
-        const { modId } = this.props.navigation.state.params.mod
+        const { modId, modAddress, modType } = this.props.navigation.state.params.mod
 
         if (socketGlobal.connected) {
             this.props.updateModField(modId, codename, value)
 
+            // this.setState({
+            //     modValues: {
+            //         ...this.state.modValues,
+            //         [codename]: value
+            //     }
+            // })
+
             socketGlobal.emit("updateModField", {
                 modId: modId,
+                modAddress: modAddress,
+                modType: modType,
                 codename: codename,
                 value: value
             })
@@ -171,7 +181,7 @@ export default class ModuleScreen extends React.Component {
         var { modId, modType, modAddress } = this.props.navigation.state.params.mod
         modType = this.props.modTypes[modType]
 
-        const modFields = this.props.modValues[modId]
+        const modValues = this.props.modValues[modId]
         // console.log("ModuleScreen rerender", modId, "hue: " + modFields.hue)        
 
         return <View style={styles.container}>
@@ -180,7 +190,7 @@ export default class ModuleScreen extends React.Component {
                 contentStyle={styles.contents}
                 indicator={getIndicator(modType)}
                 indicatorHeight="8"
-                indicatorData={modFields}>
+                indicatorData={modValues}>
 
                     <Text style={styles.topRight}>{modType.codename + " at " + leadingZero(modAddress)}</Text>
 
@@ -191,7 +201,7 @@ export default class ModuleScreen extends React.Component {
                         keyExtractor={(item) => item}
                         renderItem={({ item }) => <Field
                             field={this.props.modFields[item]}
-                            value={modFields[item]}
+                            value={this.state.modValues[item]}
                             onValueChange={(value) => this.updateField(item, value)}
                         />}
                     />
@@ -218,7 +228,7 @@ export default class ModuleScreen extends React.Component {
 
                         <NamedInput name="Preset's name" value={this.state.presetName} onChangeText={(value) => this.setState({ ...this.state, presetName: value })} />
 
-                        <Button style={{ marginTop: 6 }} title="Create preset" color="#4CAF50" onPress={() => this.addPreset(modFields)} />
+                        <Button style={{ marginTop: 6 }} title="Create preset" color="#4CAF50" onPress={() => this.addPreset(modValues)} />
                 </CardView>
             </View>
         </View>

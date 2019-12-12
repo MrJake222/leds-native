@@ -1,0 +1,20 @@
+{
+  "files.exclude": {
+    "node_modules": true,
+    ".vscode": true,
+    ".buckconfig": true,
+    ".eslintrc.js": true,
+    ".flowconfig": true,
+    ".gitattributes": true,
+    ".watchmanconfig": true,
+    ".prettierrc.js": true,
+    ".gitignore": true,
+    "app.json": true,
+    "babel.config.js": true,
+    "index.js": true,
+    "metro.config.js": true,
+    "package-lock.json": true,
+    "package.json": true,
+    "README.md": true
+  }
+}

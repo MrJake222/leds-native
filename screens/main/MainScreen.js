@@ -73,11 +73,16 @@ export default class MainScreen extends React.PureComponent {
     }
 
     applyPreset() {
-        const { presetName } = this.props.selectedPreset
+        const { _id, presetName } = this.props.selectedPreset
         const modules = this.props.selectedModules
 
         if (socketGlobal.connected){
             ToastAndroid.show("Applying preset " + presetName + " to " + modules.length + " modules", ToastAndroid.SHORT)
+
+            socketGlobal.emit("applyPreset", {
+                presetId: _id,
+                modules: modules
+            })
         }
 
         else {
