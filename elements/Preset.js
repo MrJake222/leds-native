@@ -9,11 +9,11 @@ import {
     Alert
 } from 'react-native'
 import CardView from './CardView';
-import getIndicator from '../indicator/getIndicator';
 import getSelectionColor from '../indicator/getSelectionColor';
 import { socketGlobal } from '../network/socket';
 import { removeFromStorarge } from '../network/updateDatabase';
 import { presetDelete, appSelectPreset } from '../redux/actions';
+import IndicatorHelper from '../indicator/IndicatorHelper';
 
 const mapStateToProps = (state) => ({
     selectedPreset: state.appStatus.selectedPreset,
@@ -43,9 +43,9 @@ class Preset extends React.Component {
         return <CardView
             style={styles.container}
             contentStyles={[styles.contents, { backgroundColor: bgColor }]}
-            indicator={getIndicator(modType)}
-            indicatorHeight={8}
-            indicatorData={values}
+            indicator={IndicatorHelper.indicatorMod(modType).create(values)}
+            // indicatorHeight={8}
+            // indicatorData={values}
 
             onPress={() => {
                 this.props.selectPreset(this.props.preset)

@@ -13,14 +13,13 @@ import {
  * @param   {number}  l       The lightness
  * @return  {Array}           The RGB representation
  */
-
-export function hslToRgb(h, s, l) {
+export function hslToRgb(h: number, s: number, l: number) {
     var r, g, b;
 
     if(s == 0){
         r = g = b = l; // achromatic
     }else{
-        var hue2rgb = function hue2rgb(p, q, t){
+        var hue2rgb = function hue2rgb(p: number, q: number, t: number){
             if(t < 0) t += 1;
             if(t > 1) t -= 1;
             if(t < 1/6) return p + (q - p) * 6 * t;
@@ -39,23 +38,23 @@ export function hslToRgb(h, s, l) {
     return [Math.round(r * 255), Math.round(g * 255), Math.round(b * 255)];
 }
 
-export function toHex(dec, zero=false) {
-    dec = dec.toString(16).toUpperCase()
+export function toHex(dec: number, zero: boolean=false) {
+    var hexString = dec.toString(16).toUpperCase()
 
-    if (dec.length % 2 != 0) 
-        dec = "0" + dec
+    if (hexString.length % 2 != 0) 
+        hexString = "0" + dec
 
     if (zero)
-        dec = "0x" + dec
+        hexString = "0x" + dec
 
-    return dec
+    return hexString
 }
 
-export function leadingZero(number, length=2) {
-    number = number.toString()
+export function leadingZero(number: number, length: number=2) {
+    var numberString = number.toString()
 
-    while (number.length < length)
-        number = "0" + number
+    while (numberString.length < length)
+        numberString = "0" + number
 
     return number
 }
@@ -65,7 +64,7 @@ export function leadingZero(number, length=2) {
  * 
  * @param {*} str 
  */
-export function title(str) {
+export function title(str: string) {
     if (str.length > 0)
         return str[0].toUpperCase() + str.slice(1)
         
@@ -77,12 +76,12 @@ export function title(str) {
  * Checks if modName isn't empty and for invalid or
  * Duplicate addresses
  * 
- * @param {*} modName Module's name
- * @param {*} modAddress Module's address
- * @param {*} addressList Address list, for ex. from store
- * @param {boolean} update Skip duplicate address check
+ * @param modName Module's name
+ * @param modAddress Module's address
+ * @param addressList Address list, for ex. from store
+ * @param update Skip duplicate address check
  */
-export function validateModuleData(modName, modAddress, addressList, update = false) {
+export function validateModuleData(modName: string, modAddress: number, addressList: number[], update: boolean=false) {
     if (modName == "") {
         ToastAndroid.show("Module's name cannot be empty", ToastAndroid.SHORT);
         return false

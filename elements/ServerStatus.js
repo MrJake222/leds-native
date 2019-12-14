@@ -9,7 +9,7 @@ import {
     Text,
 } from 'react-native'
 import CardView from '../elements/CardView';
-import IndicatorColor from '../indicator/IndicatorColor';
+import IndicatorHelper from '../indicator/IndicatorHelper';
 
 const mapStateToProps = (state) => ({
     serverAddress: state.serverData.serverAddress,
@@ -28,9 +28,7 @@ class ServerStatus extends React.PureComponent {
         return <CardView
             style={styles.container}
             contentStyles={styles.contents} 
-            indicator={IndicatorColor} 
-            indicatorHeight={8} 
-            indicatorData={{...serverStatusColor, hue: this.props.connected ? 120 : 0}}>
+            indicator={IndicatorHelper.indicator("color").create({...serverStatusColor, hue: this.props.connected ? 120 : 0})}>
             
                 <View style={styles.titleBar}>
                     {this.props.connected ? <View /> : <ActivityIndicator />}

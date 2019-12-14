@@ -1,19 +1,21 @@
-import { actionTypes } from "./actions";
+import { AppAction, APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, ServerAction, ModuleAction, MOD_ADD_MODULE, MOD_DELETE_MODULE, APP_CLEAR_DATA, MOD_NAME_ADDRESS_UPDATE, FieldAction, MOD_ADD_FIELD, TypeAction, MOD_ADD_TYPE, ValuesAction, MOD_ADD_VALUES, MOD_FIELD_UPDATE, PRESET_ADD, PRESET_DELETE, PresetAction } from "./actionTypes";
+import RootState, { getDefaultState } from "./RootState";
+import { Reducer } from "react";
 
 // -----------------------
 // Reducers
 
-function appStatus(appStatus = {}, action) {
+function appStatus(appStatus: RootState["appStatus"], action: AppAction) {
     switch (action.type) {
 
-        case actionTypes.APP_INITIALIZE:
+        case APP_INITIALIZE:
             return {
                 ...appStatus,
                 isAppInitialized: action.isAppInitialized
             }
 
-        case actionTypes.APP_LOAD_STATE:
-            var loadStates = {
+        case APP_LOAD_STATE:
+            var loadStates: {[key: string]: boolean} = {
                 ...appStatus.loadStates,
                 [action.loadState]: action.state
             }
@@ -27,25 +29,25 @@ function appStatus(appStatus = {}, action) {
                 loadStates: loadStates
             }
 
-        case actionTypes.APP_LOAD_ALL_STATES:
+        case APP_LOAD_ALL_STATES:
             const keys = Object.keys(appStatus.loadStates)
-            loadStates = keys.reduce((prev, current) => ({...prev, [current]: action.state}), {})
+            const loadStates2 = keys.reduce((prev, current) => ({...prev, [current]: action.state}), {})
 
             return {
                 ...appStatus,
 
                 isAppLoaded: action.state,
-                loadStates: loadStates
+                loadStates: loadStates2
             }
 
-        case actionTypes.APP_SELECT_PRESET:
+        case APP_SELECT_PRESET:
             return {
                 ...appStatus,
 
                 selectedPreset: action.preset
             }
         
-        case actionTypes.APP_SELECT_MODULE:
+        case APP_SELECT_MODULE:
             return {
                 ...appStatus,
 
@@ -55,14 +57,14 @@ function appStatus(appStatus = {}, action) {
                 ]
             }
 
-        case actionTypes.APP_DESELECT_MODULE:            
+        case APP_DESELECT_MODULE:            
             return {
                 ...appStatus,
 
                 selectedModules: appStatus.selectedModules.filter((modId) => modId != action.modId),
             }
 
-        case actionTypes.APP_DESELECT_ALL_MODULES:
+        case APP_DESELECT_ALL_MODULES:
             return {
                 ...appStatus,
 
@@ -73,17 +75,17 @@ function appStatus(appStatus = {}, action) {
     return appStatus
 }
 
-function serverData(serverData = {}, action) {
+function serverData(serverData: RootState["serverData"], action: ServerAction) {
     switch (action.type) {
 
-        case actionTypes.SERVER_UPDATE_CONFIG:
+        case SERVER_UPDATE_CONFIG:
             return {
                 ...serverData,
                 serverAddress: action.serverAddress,
                 serverPort: action.serverPort
             }
 
-        case actionTypes.SERVER_UPDATE_CONNECTION_STATUS:
+        case SERVER_UPDATE_CONNECTION_STATUS:
             return {
                 ...serverData,
                 connected: action.connected,
@@ -94,24 +96,24 @@ function serverData(serverData = {}, action) {
     return serverData
 }
 
-function modules(modules = {}, action) {
+function modules(modules: RootState["modules"], action: ModuleAction) {
     switch (action.type) {
 
-        case actionTypes.MOD_ADD_MODULE:
+        case MOD_ADD_MODULE:
             return {
                 ...modules,
-                [action.module.modId]: action.module
+                [action.moduleObj._id]: action.moduleObj
             }
 
-        case actionTypes.MOD_DELETE_MODULE:
+        case MOD_DELETE_MODULE:
             const { [action.modId]: value, ...removed } = modules
             
             return removed
 
-        case actionTypes.APP_CLEAR_DATA:
+        case APP_CLEAR_DATA:
             return {}
 
-        case actionTypes.MOD_NAME_ADDRESS_UPDATE:
+        case MOD_NAME_ADDRESS_UPDATE:
             return {
                 ...modules,
 
@@ -128,32 +130,32 @@ function modules(modules = {}, action) {
     return modules
 }
 
-function modFields(modFields = {}, action) {
+function modFields(modFields: RootState["modFields"], action: FieldAction) {
     switch (action.type) {
 
-        case actionTypes.MOD_ADD_FIELD:
+        case MOD_ADD_FIELD:
             return {
                 ...modFields,
                 [action.field.codename]: action.field
             }
 
-        case actionTypes.APP_CLEAR_DATA:
+        case APP_CLEAR_DATA:
             return {}
     }
 
     return modFields
 }
 
-function modTypes(modTypes = {}, action) {
+function modTypes(modTypes: RootState["modTypes"], action: TypeAction) {
     switch (action.type) {
 
-        case actionTypes.MOD_ADD_TYPE:
+        case MOD_ADD_TYPE:
             return {
                 ...modTypes,
                 [action.modType.codename]: action.modType
             }
 
-        case actionTypes.APP_CLEAR_DATA:
+        case APP_CLEAR_DATA:
             return {}
 
     }
@@ -161,16 +163,16 @@ function modTypes(modTypes = {}, action) {
     return modTypes
 }
 
-function modValues(modValues = {}, action) {
+function modValues(modValues: RootState["modValues"], action: ValuesAction) {
     switch (action.type) {
 
-        case actionTypes.MOD_ADD_VALUES:
+        case MOD_ADD_VALUES:
             return {
                 ...modValues,
                 [action.modValues.modId]: action.modValues
             }
 
-        case actionTypes.MOD_FIELD_UPDATE:
+        case MOD_FIELD_UPDATE:
             return {
                 ...modValues,
 
@@ -180,7 +182,7 @@ function modValues(modValues = {}, action) {
                 }
             }
 
-        case actionTypes.APP_CLEAR_DATA:
+        case APP_CLEAR_DATA:
             return {}
 
     }
@@ -192,29 +194,41 @@ function modValues(modValues = {}, action) {
 // ------------------------------------------------------------
 // Presets
 
-function presets(presets = {}, action) {
+function presets(presets: RootState["presets"], action: PresetAction): RootState["presets"] {
     switch (action.type) {
 
-        case actionTypes.PRESET_ADD:
+        case PRESET_ADD:
             return {
                 ...presets,
                 [action.preset._id]: action.preset
             }
 
-        case actionTypes.PRESET_DELETE:
-            const { [action.id]: value, ...removed } = presets
+        case PRESET_DELETE:
+            const { [action.presetId]: value, ...removed } = presets
             
             return removed
 
-        case actionTypes.APP_CLEAR_DATA:
+        case APP_CLEAR_DATA:
             return {}
     }
 
     return presets
 }
 
+// export const reducer = combineReducers({
+//     appStatus: appStatus,
 
-export function reducer(state = {}, action) {
+//     serverData: serverData,
+
+//     modules: modules,
+//     modFields: modFields,
+//     modTypes: modTypes,
+//     modValues: modValues,
+
+//     presets: presets,
+// })
+
+export function reducer(state: RootState = getDefaultState(), action: any): RootState {
     return {
         ...state,
         appStatus: appStatus(state.appStatus, action),

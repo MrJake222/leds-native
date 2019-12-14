@@ -1,22 +1,26 @@
 import { AsyncStorage } from 'react-native'
-import { modAddValues, modAddType, modAddModule, modAddField, appLoad, presetAdd, appLoadState } from '../redux/actions';
+import { modAddValues, modAddType, modAddModule, modAddField, presetAdd, appLoadState } from '../redux/actions';
+import LastModified from '../types/LastModified';
+import store from '../redux/store';
 
 /**
  * Reads up last modification date from AsyncStorage and loads
  * modules, presets etc. from AsyncStorage or from the server.
  */
-export async function loadDatabase(lastModified, socket, force = false) {
-    loadState = 0
-
+export async function loadDatabase(lastModified: LastModified[], socket: SocketIOClient.Socket, force = false) {
     lastModified.forEach(async ({fieldName, lastModified}) => {
-        var lastModifiedClient = new Date(await AsyncStorage.getItem(fieldName + "LastModified"))
+        var lastModifiedClient: string | Date | null = await AsyncStorage.getItem(fieldName + "LastModified")
 
+        if (lastModifiedClient != null)
+            lastModifiedClient = new Date(lastModifiedClient)
+        else
+            force = true
         // if (fieldName=="presets") {
         //     console.log("lastModifiedClient", lastModifiedClient)
         //     console.log("lastModified", lastModified)
         // }
 
-        if (new Date(lastModified) > lastModifiedClient || force) {
+        if (force || new Date(lastModified) > lastModifiedClient!) {
             // if (fieldName == "modules")
             console.log(fieldName + " from server")
 
@@ -27,23 +31,23 @@ export async function loadDatabase(lastModified, socket, force = false) {
 
         else {
             var docs = await AsyncStorage.getItem(fieldName)
-            docs = JSON.parse(docs)
+            docs = JSON.parse(docs!)
 
             // if (fieldName == "modules") {
                 // console.log(fieldName + " from client")
                 // console.log("docs", docs)
             // }
 
-            Object.values(docs).forEach((doc) => addToStore(fieldName, doc))
+            Object.values(docs!).forEach((doc) => addToStore(fieldName, doc))
 
             store.dispatch(appLoadState(fieldName, true))
         }
     })
 }
 
-export async function removeFromStorarge(fieldName, _id) {
-    var storageDocs = await AsyncStorage.getItem(fieldName)
-    storageDocs = JSON.parse(storageDocs) || {}
+export async function removeFromStorarge(fieldName: string, _id: string) {
+    const storageDocsRaw = await AsyncStorage.getItem(fieldName)
+    const storageDocs = JSON.parse(storageDocsRaw!) || {}
 
     const {[_id]: value, ...removed} = storageDocs
 
@@ -54,7 +58,7 @@ export async function removeFromStorarge(fieldName, _id) {
 /**
  * Stores actionCreators for @see addToStore
  */
-const actionCreators = {
+const actionCreators: {[name: string]: (doc: any) => any} = {
     modules: modAddModule,
     modTypes: modAddType,
     modFields: modAddField,
@@ -68,10 +72,10 @@ const actionCreators = {
  * Document should be properly formatted for ex. {_id: data}
  * Does not handle AsyncStorage insertion
  * 
- * @param {*} fieldName Name of field
- * @param {*} doc Elements data in {_id: data} format
+ * @param fieldName Name of field
+ * @param  doc Elements data in {_id: data} format
  */
-export function addToStore(fieldName, doc) {
+export function addToStore(fieldName: string, doc: any) {
     var actionCreator = actionCreators[fieldName]
 
     if (actionCreator) {
@@ -81,13 +85,4 @@ export function addToStore(fieldName, doc) {
     else {
         throw "No such creator"
     }
-}
-
-function objToArray(obj) {
-
-    return Object.keys(obj).map((key) => {
-        return {
-            [key]: obj[key]
-        }
-    })
 }

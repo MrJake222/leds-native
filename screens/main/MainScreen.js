@@ -120,52 +120,53 @@ export default class MainScreen extends React.PureComponent {
     render() {
         // console.log("MainScreen rerender", this.props.presets)
 
-        return <ScrollView contentContainerStyle={{ flex: 1 }} refreshControl={<RefreshControl colors={["#4CAF50"]} refreshing={!this.props.isAppLoaded} onRefresh={this.refresh} />}>
-            <View style={styles.container}>
-                {/* Contains module definitions */}
-                <View style={styles.modules}>
-                    {/* <Button style={{zIndex: 0}} title="Clear AsyncStorage" onPress={() => AsyncStorage.clear()} /> */}
+        // return <ScrollView contentContainerStyle={{ flex: 1 }} refreshControl={<RefreshControl colors={["#4CAF50"]} refreshing={!this.props.isAppLoaded} onRefresh={this.refresh} />}>
+        return <View style={styles.container}>
+            {/* Contains module definitions */}
+            <View style={styles.modules}>
+                {/* <Button style={{zIndex: 0}} title="Clear AsyncStorage" onPress={() => AsyncStorage.clear()} /> */}
+
+                <FlatList
+                    // contentContainerStyle={{ flex: 1 }}
+                    refreshControl={<RefreshControl colors={["#4CAF50"]} refreshing={!this.props.isAppLoaded} onRefresh={this.refresh} />}
+                    data={Object.values(this.props.modules)}
+                    keyExtractor={(item) => item.modId.toString()}
+
+                    renderItem={({ item }) => <Module
+                        mod={item}
+                        openModule={() => this.props.navigation.navigate("Module", { mod: item })}
+                    />}
+                />
+            </View>
+
+            {/* Status information, maybe presets */}
+            <View style={styles.status}>
+                <ServerStatus />
+                {/* <Preset preset={this.props.presets[0]}/> */}
+
+                <View style={styles.presets}>
+                    <Text style={styles.presetsHeader}>Presets</Text>
 
                     <FlatList
                         contentContainerStyle={{ flex: 1 }}
-                        data={Object.values(this.props.modules)}
-                        keyExtractor={(item) => item.modId.toString()}
+                        data={Object.values(this.props.presets)}
+                        keyExtractor={(item) => item._id.toString()}
 
-                        renderItem={({ item }) => <Module
-                            mod={item}
-                            openModule={() => this.props.navigation.navigate("Module", { mod: item })}
+                        renderItem={({ item }) => <Preset
+                            preset={item}
+                            
+                            setPresetMode={() => {
+                                this.props.navigation.setParams({
+                                    headerTitle: "Apply preset " + item.presetName,
+                                    presetMode: true
+                                })
+                            }}
                         />}
                     />
                 </View>
-
-                {/* Status information, maybe presets */}
-                <View style={styles.status}>
-                    <ServerStatus />
-                    {/* <Preset preset={this.props.presets[0]}/> */}
-
-                    <View style={styles.presets}>
-                        <Text style={styles.presetsHeader}>Presets</Text>
-
-                        <FlatList
-                            contentContainerStyle={{ flex: 1 }}
-                            data={Object.values(this.props.presets)}
-                            keyExtractor={(item) => item._id.toString()}
-
-                            renderItem={({ item }) => <Preset
-                                preset={item}
-                                
-                                setPresetMode={() => {
-                                    this.props.navigation.setParams({
-                                        headerTitle: "Apply preset " + item.presetName,
-                                        presetMode: true
-                                    })
-                                }}
-                            />}
-                        />
-                    </View>
-                </View>
             </View>
-        </ScrollView>
+        </View>
+        // </ScrollView>
     }
 }
 

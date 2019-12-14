@@ -1,18 +1,21 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 
 import {
     StyleSheet,
 
     Text,
+    ToastAndroid,
 } from 'react-native'
-import getIndicator from '../indicator/getIndicator';
 import CardView from './CardView';
 import { leadingZero } from '../helpers';
 import { selectModule, deselectModule } from '../redux/actions';
 import getSelectionColor from '../indicator/getSelectionColor';
+import IndicatorHelper from '../indicator/IndicatorHelper';
+import Module from '../types/Module';
+import RootState from '../redux/RootState';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: RootState) => ({
     selectedPreset: state.appStatus.selectedPreset,
     selectedModules: state.appStatus.selectedModules,
 
@@ -20,32 +23,40 @@ const mapStateToProps = (state) => ({
     modValues: state.modValues
 })
 
-const mapDispatchToProps = (dispatch) => ({
-    selectModule: (modId) => dispatch(selectModule(modId)),
-    deselectModule: (modId) => dispatch(deselectModule(modId)),
-})
+const mapDispatchToProps = {
+    selectModule: (modId: string) => selectModule(modId),
+    deselectModule: (modId: string) => deselectModule(modId),
+}
 
-class Module extends React.Component {
-    shouldComponentUpdate(nextProps) {
-        const {modId} = this.props.mod
+interface ModuleOwnProps {
+    mod: Module
+    openModule: () => void
+}
 
-        return this.props.modValues[modId] !== nextProps.modValues[modId] ||
+const connector = connect(mapStateToProps, mapDispatchToProps)
+type ModuleProps = ConnectedProps<typeof connector> & ModuleOwnProps
+
+class ModuleComponent extends React.Component<ModuleProps> {
+    shouldComponentUpdate(nextProps: ModuleProps) {
+        const {_id} = this.props.mod
+
+        return this.props.modValues[_id] !== nextProps.modValues[_id] ||
             this.props.mod !== nextProps.mod ||
             this.props.selectedPreset !== nextProps.selectedPreset ||
             this.props.selectedModules !== nextProps.selectedModules
     }
 
     render() {
-        let {modId, modAddress, modName, modType} = this.props.mod
-        modType = this.props.modTypes[modType]
-        modValues = this.props.modValues[modId]
+        let {_id, modAddress, modName, modType} = this.props.mod
+        const modTypeObject = this.props.modTypes[modType]
+        const modValuesObject = this.props.modValues[_id]
 
         const { selectedPreset }= this.props
         let bgColor = null
 
         const presetMode = selectedPreset !== null
-        const greyedOut = presetMode && selectedPreset.modType != modType.codename
-        const selected = presetMode && this.props.selectedModules.includes(modId)
+        const greyedOut = presetMode && selectedPreset!.modType != modTypeObject.codename
+        const selected = presetMode && this.props.selectedModules.includes(_id)
 
         // console.log(modId, greyedOut, this.props.selectedModules, selected)        
 
@@ -60,10 +71,8 @@ class Module extends React.Component {
 
         return <CardView
             style={styles.container}
-            indicator={getIndicator(modType)}
-            indicatorHeight="8"
-            indicatorData={modValues}
-            contentStyles={[styles.contents, {backgroundColor: bgColor}]}
+            indicator={IndicatorHelper.indicatorMod(modTypeObject).create(modValuesObject)}
+            contentStyle={[styles.contents, {backgroundColor: bgColor!}]}
             
             onPress={() => {
                 if (presetMode) {
@@ -71,10 +80,10 @@ class Module extends React.Component {
                         ToastAndroid.show("Cannot select this module. Types dont't match.", ToastAndroid.SHORT)
 
                     else if (selected)
-                        this.props.deselectModule(modId)
+                        this.props.deselectModule(_id)
 
                     else
-                        this.props.selectModule(modId)
+                        this.props.selectModule(_id)
                 }
 
                 else {
@@ -88,7 +97,7 @@ class Module extends React.Component {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Module)
+export default connector(ModuleComponent)
 
 const styles = StyleSheet.create({
     container: {

@@ -36,7 +36,7 @@ export default class MainStackNavigator extends React.Component {
                 },
 
                 Module: {
-                    screen: connect(ModuleScreen.mapStateToProps, ModuleScreen.mapDispatchToProps)(ModuleScreen),
+                    screen: ModuleScreen,
                     navigationOptions: ({navigation}) => ({
                         title: navigation.state.params.mod.modName,
                         headerRight: ModuleScreen.removeIcon(navigation),
