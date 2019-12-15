@@ -8,6 +8,7 @@ import {
 import {hslToRgb, toHex} from '../helpers'
 import { IndicatorInterface } from './IndicatorHelper';
 import HslColors from '../types/HslColors';
+import Preset from '../types/Preset';
 
 function toHexColor({hue, saturation, lightness}: HslColors): string {
     var rgb = hslToRgb(hue/360, saturation/100, lightness/100)
@@ -34,5 +35,17 @@ export class IndicatorColorComponent extends React.Component<IndicatorColorProps
 export default class IndicatorColor implements IndicatorInterface {
     create(data: any, height: number=8): React.ReactElement {
         return <IndicatorColorComponent height={height} data={data} />
+    }
+
+    selectionColor(preset: Preset): string {
+        const { hue, saturation, lightness } = preset.values
+        var color = "rgba("
+        
+        hslToRgb(hue/360, saturation/100, lightness/100)
+            .forEach((e) => { color += e + ", " })
+
+        color += "0.15"
+
+        return color + ")"
     }
 }

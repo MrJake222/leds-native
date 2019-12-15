@@ -100,8 +100,6 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
 
         const { _id, modAddress, modName } = this.props.navigation.getParam("mod")
 
-        console.log("props", props)
-
         this.state = {
             modName: modName,
             modAddress: modAddress,
@@ -157,6 +155,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
 
         if (socketGlobal.connected) {
             this.props.updateModField(_id, codename, value)
+            this.props.updateModField(_id, "preset", null)
 
             // this.setState({
             //     modValues: {
@@ -188,6 +187,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                 values = { ...values }
                 delete values._id
                 delete values.modId
+                values.preset = this.state.presetName
 
                 socketGlobal.emit("addPreset", {
                     presetName: this.state.presetName,
@@ -244,7 +244,6 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                     <Text style={styles.topRight}>Properties</Text>
 
                     <NamedInput name="Module's name" value={this.state.modName} onChangeText={(value: string) => this.setState({ modName: value })} />
-                    <NamedInput name="Module's address" value={this.state.modAddress.toString()} keyboardType="numeric" onChangeText={(value: string) => this.setState({ modAddress: parseInt(value) })} />
                     <NamedInput name="Module's address" value={this.state.modAddress.toString()} keyboardType="numeric" onChangeText={(value: string) => this.setState({ modAddress: parseInt(value) })} />
 
                     {/* style={{ marginTop: 6 }} */}

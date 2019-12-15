@@ -8,6 +8,14 @@ import {
     FlatList
 } from 'react-native'
 
+interface Props {
+    name: string
+    value: string
+    items: {name: string, value: string}[]
+
+    onValueChange: (value: string) => void
+}
+
 /**
  * Props:
  *  name - Text to be displayed
@@ -15,7 +23,7 @@ import {
  *  items - array of objects {name, value}
  *  onValueChange(value) - event when value has been changed
  */
-export default class NamedPicker extends React.Component {
+export default class NamedPicker extends React.Component<Props> {
     render() {
         var items = this.props.items.map((item) => (
             <Picker.Item key={item.name} label={item.name} value={item.value} />

@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 
 import {
     ActivityIndicator,
@@ -12,21 +12,33 @@ import {
     AsyncStorage
 } from 'react-native'
 import { title } from '../helpers';
+import RootState from '../redux/RootState';
+import { NavigationScreenProp } from 'react-navigation';
 // import store from '../redux/store';
 
 // Sorted array
 const loadStateArray = ["modules", "modTypes", "modFields", "modValues", "presets"]
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: RootState) => ({
     isAppInitialized: state.appStatus.isAppInitialized,
     isAppLoaded: state.appStatus.isAppLoaded,
     loadStates: state.appStatus.loadStates,
 })
 
-class ConnectionWrapper extends React.Component {
+interface ConnectionWrapperScreenOwnProps {
+    navigation: NavigationScreenProp<any>
+}
+
+const connector = connect(mapStateToProps)
+type ConnectionWrapperScreenProps = ConnectedProps<typeof connector> & ConnectionWrapperScreenOwnProps
+
+class ConnectionWrapperScreen extends React.Component<ConnectionWrapperScreenProps> {
     async componentDidMount() {
         const ignoreMount = this.props.navigation.getParam("ignoreMount", false)
         const isAppInitialized = await AsyncStorage.getItem("isAppInitialized") == "true"
+
+        console.log("isAppInitialized", isAppInitialized)
+        console.log("ignoreMount", ignoreMount)
 
         if (!isAppInitialized && !ignoreMount) {
             this.props.navigation.navigate("AppConfig")
@@ -40,10 +52,9 @@ class ConnectionWrapper extends React.Component {
     }
 
     render() {
-        var genStatus = (key) => {
+        var genStatus = (key: string) => {
             var loaded = this.props.loadStates[key]
             var color = loaded ? "#388E3C" : "#FF5252"
-            // console.log("loaded", key, loaded)
 
             return <Text style={[styles.text, { color: color }]}>{title(key)}</Text>
         }
@@ -76,7 +87,7 @@ class ConnectionWrapper extends React.Component {
     }
 }
 
-export default connect(mapStateToProps)(ConnectionWrapper)
+export default connector(ConnectionWrapperScreen)
 
 const styles = StyleSheet.create({
     container: {

@@ -6,7 +6,7 @@ export function setRootNavigatorRef(navigatorRef: NavigationContainerComponent) 
     rootNavigatorRef = navigatorRef
 }
 
-export function rootNavigatorNavigate(routeName: string, params: NavigationParams) {
+export function rootNavigatorNavigate(routeName: string, params?: NavigationParams) {
     rootNavigatorRef!.dispatch(
         NavigationActions.navigate({
             routeName,

@@ -10,7 +10,6 @@ import {
 import CardView from './CardView';
 import { leadingZero } from '../helpers';
 import { selectModule, deselectModule } from '../redux/actions';
-import getSelectionColor from '../indicator/getSelectionColor';
 import IndicatorHelper from '../indicator/IndicatorHelper';
 import Module from '../types/Module';
 import RootState from '../redux/RootState';
@@ -51,8 +50,10 @@ class ModuleComponent extends React.Component<ModuleProps> {
         const modTypeObject = this.props.modTypes[modType]
         const modValuesObject = this.props.modValues[_id]
 
+        // console.log("this.props.modValues", this.props.modValues)
+
         const { selectedPreset }= this.props
-        let bgColor = null
+        let bgColor: string | null = null
 
         const presetMode = selectedPreset !== null
         const greyedOut = presetMode && selectedPreset!.modType != modTypeObject.codename
@@ -65,7 +66,8 @@ class ModuleComponent extends React.Component<ModuleProps> {
                 bgColor = "rgba(52, 52, 52, 0.1)"
 
             else if (selected) {
-                bgColor = getSelectionColor(modType, selectedPreset)
+                // bgColor = getSelectionColor(modType, selectedPreset)
+                bgColor = IndicatorHelper.indicatorMod(modTypeObject).selectionColor(selectedPreset!)
             }
         }
 
@@ -91,7 +93,8 @@ class ModuleComponent extends React.Component<ModuleProps> {
                 }
             }}>
 
-                <Text style={styles.address}>{leadingZero(modAddress)}</Text>
+                {/* <Text style={styles.address}>{leadingZero(modAddress)}</Text> */}
+                <Text style={styles.preset}>{modValuesObject.preset}</Text>
                 <Text style={styles.name}>{modName}</Text>
         </CardView>
     }
@@ -110,7 +113,16 @@ const styles = StyleSheet.create({
         paddingVertical: 8,
     },
 
-    address: {
+    // address: {
+    //     position: "absolute",
+    //     top: 0,
+    //     right: 3,
+
+    //     fontSize: 14,
+    //     color: "#757575"
+    // },
+
+    preset: {
         position: "absolute",
         top: 0,
         right: 3,

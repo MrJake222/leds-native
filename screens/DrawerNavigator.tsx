@@ -11,7 +11,6 @@ import { createAppContainer } from 'react-navigation';
 import { createDrawerNavigator, DrawerItems } from 'react-navigation-drawer';
 
 import MainStackNavigator from './main/MainStackNavigator';
-import AdminNavigator from './admin/AdminNavigator';
 
 export default class DrawerNavigator extends React.Component {
     render() {

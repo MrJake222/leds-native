@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 
 import {
     StyleSheet,
@@ -9,23 +9,39 @@ import {
     ToastAndroid
 } from 'react-native'
 
-import NamedInput from '~/elements/NamedInput';
+import NamedInput from '../../elements/NamedInput';
 import NamedPicker from '../../elements/NamedPicker';
 import { modAddModule } from '../../redux/actions';
 import { socketGlobal } from '../../network/socket';
 import { validateModuleData } from '../../helpers';
+import RootState from '../../redux/RootState';
+import Module from '../../types/Module';
+import { NavigationScreenProp, NavigationRoute } from 'react-navigation';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: RootState) => ({
     modTypes: state.modTypes,
     modules: state.modules
 })
 
-const mapDispatchToProps = (dispatch) => ({
-    addModule: (moduleObj) => dispatch(modAddModule(moduleObj))
-})
+const mapDispatchToProps = {
+    addModule: (moduleObj: Module) => modAddModule(moduleObj)
+}
 
-class AddModule extends React.Component {
-    constructor(props) {
+interface AddModuleScreenOwnProps {
+    navigation: NavigationScreenProp<any>
+}
+
+interface AddModuleScreenState {
+    modName: string
+    modAddress: string
+    modType: string
+}
+
+const connector = connect(mapStateToProps, mapDispatchToProps)
+type AddModuleScreenProps = ConnectedProps<typeof connector> & AddModuleScreenOwnProps
+
+class AddModuleScreen extends React.Component<AddModuleScreenProps, AddModuleScreenState> {
+    constructor(props: AddModuleScreenProps) {
         super(props)
 
         this.state = {
@@ -38,7 +54,7 @@ class AddModule extends React.Component {
         this.create = this.create.bind(this)
     }
 
-    updateValues(key, value) {
+    updateValues(key: string, value: string) {
         this.setState({
             ...this.state,
             [key]: value
@@ -87,7 +103,7 @@ class AddModule extends React.Component {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AddModule)
+export default connector(AddModuleScreen)
 
 const styles = StyleSheet.create({
     container: {

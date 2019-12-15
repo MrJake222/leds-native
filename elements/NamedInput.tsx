@@ -4,8 +4,19 @@ import {
 
     View,
     Text,
-    TextInput
+    TextInput,
+    KeyboardTypeOptions
 } from 'react-native'
+
+interface Props {
+    name: string
+    value: string
+    keyboardType?: KeyboardTypeOptions
+
+    onChangeText?: (text: string) => void
+    onFocus?: () => void
+    onBlur?: () => void
+}
 
 /**
  * Props:
@@ -14,7 +25,7 @@ import {
  *  keyboardType - keyboard type (numeric)
  *  onChangeText(value) - event when value has been changed
  */
-export default class NamedInput extends React.Component {
+export default class NamedInput extends React.Component<Props> {
     render() {
         return <View style={styles.inputContainer}>
             <Text style={styles.text}>{this.props.name}</Text>

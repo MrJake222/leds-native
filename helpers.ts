@@ -56,7 +56,7 @@ export function leadingZero(number: number, length: number=2) {
     while (numberString.length < length)
         numberString = "0" + number
 
-    return number
+    return numberString
 }
 
 /**
@@ -97,5 +97,32 @@ export function validateModuleData(modName: string, modAddress: number, addressL
         return false
     }
 
+    return true
+}
+
+export function checkIPAddress(address: string): boolean {
+    const regex = new RegExp("^([012]?[0-9]?[0-9]\.){3}[012]?[0-9]?[0-9]$")
+
+    if (!regex.test(address)) {
+        return false
+    }
+
+    else {
+        var octets = address.split(".").map(oct => parseInt(oct))
+
+        if (Math.max(...octets) > 255)
+            return false
+    }
+
+    return true
+}
+
+export function checkPort(port: string): boolean {
+    const portNum = parseInt(port)
+
+    if (Number.isNaN(portNum) || portNum > 65535) {
+        return false
+    }
+    
     return true
 }

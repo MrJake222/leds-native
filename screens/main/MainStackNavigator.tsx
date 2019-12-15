@@ -5,7 +5,7 @@ import { createStackNavigator } from "react-navigation-stack";
 
 import MainScreen from "./MainScreen"
 import ModuleScreen from "./ModuleScreen";
-import AddModule from "./AddModule";
+import AddModule from "./AddModuleScreen";
 
 export default class MainStackNavigator extends React.Component {
     render() {
@@ -20,7 +20,7 @@ export default class MainStackNavigator extends React.Component {
         const AppContainer = createAppContainer(
             createStackNavigator({
                 MainScreen: {
-                    screen: connect(MainScreen.mapStateToProps, MainScreen.mapDispatchToProps)(MainScreen),
+                    screen: MainScreen,
                     navigationOptions: ({navigation}) => {
                         var title = "Modules"
 

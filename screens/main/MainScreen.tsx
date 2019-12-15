@@ -13,15 +13,45 @@ import {
 } from 'react-native'
 
 import ServerStatus from '../../elements/ServerStatus';
-import Module from '../../elements/Module';
+import Module from '../../elements/ModuleComponent';
 import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
 import { socketGlobal } from '../../network/socket';
 import { appLoadAllStates, presetAdd, appClearData, deselectAllModules, appSelectPreset } from '../../redux/actions';
-import Preset from '../../elements/Preset';
 import { rootNavigatorNavigate } from '../../RootNavigatorRef';
+import { NavigationScreenProp } from 'react-navigation';
+import { ConnectedProps, connect } from 'react-redux';
+import RootState from '../../redux/RootState';
+import Preset from '../../types/Preset';
+import PresetComponent from '../../elements/PresetComponent';
 
-export default class MainScreen extends React.PureComponent {
-    constructor(props) {
+const mapStateToProps = (state: RootState) => {
+    return {
+        isAppLoaded: state.appStatus.isAppLoaded,
+        selectedPreset: state.appStatus.selectedPreset,
+        selectedModules: state.appStatus.selectedModules,
+
+        modules: state.modules,
+        presets: state.presets,
+    }
+}
+
+const mapDispatchToProps = {
+    deloadApp: () => appLoadAllStates(false),
+    clearData: () => appClearData(),
+    selectPreset: (preset: Preset | null) => appSelectPreset(preset),
+    deselectAllModules: () => deselectAllModules(),
+}
+
+interface MainScreenOwnProps {
+    navigation: NavigationScreenProp<any>
+}
+
+const connector = connect(mapStateToProps, mapDispatchToProps)
+
+type MainScreenProps = ConnectedProps<typeof connector> & MainScreenOwnProps
+
+class MainScreen extends React.PureComponent<MainScreenProps> {
+    constructor(props: MainScreenProps) {
         super(props)
 
         this.refresh = this.refresh.bind(this)
@@ -29,28 +59,7 @@ export default class MainScreen extends React.PureComponent {
         this.deselectPreset = this.deselectPreset.bind(this)
     }
 
-    static mapStateToProps = (state) => {
-        return {
-            isAppLoaded: state.appStatus.isAppLoaded,
-            selectedPreset: state.appStatus.selectedPreset,
-            selectedModules: state.appStatus.selectedModules,
-
-            modules: state.modules,
-            presets: state.presets,
-        }
-    }
-
-    static mapDispatchToProps = (dispatch) => {
-        return {
-            deloadApp: () => dispatch(appLoadAllStates(false)),
-            clearData: () => dispatch(appClearData()),
-            addPreset: (modTypeCodename, values) => dispatch(presetAdd(modTypeCodename, values)),
-            selectPreset: (preset) => dispatch(appSelectPreset(preset)),
-            deselectAllModules: () => dispatch(deselectAllModules()),
-        }
-    }
-
-    static addIcon = (navigation) => {
+    static addIcon = (navigation: NavigationScreenProp<any>) => {
         let onPress = () => navigation.navigate("AddModule")
         let source = require("../../assets/add.png")
 
@@ -60,7 +69,7 @@ export default class MainScreen extends React.PureComponent {
         }
 
         return <TouchableOpacity activeOpacity={0.5} onPress={onPress}>
-            <Image source={source} resizeMode="center" tintColor="#FFF" style={{ height: "100%", width: 30, marginRight: 8 }} />
+            <Image source={source} resizeMode="center" style={{ height: "100%", width: 30, marginRight: 8, tintColor: "#FFF" }} />
         </TouchableOpacity>
     }
 
@@ -73,7 +82,7 @@ export default class MainScreen extends React.PureComponent {
     }
 
     applyPreset() {
-        const { _id, presetName } = this.props.selectedPreset
+        const { _id, presetName } = this.props.selectedPreset!
         const modules = this.props.selectedModules
 
         if (socketGlobal.connected){
@@ -130,7 +139,7 @@ export default class MainScreen extends React.PureComponent {
                     // contentContainerStyle={{ flex: 1 }}
                     refreshControl={<RefreshControl colors={["#4CAF50"]} refreshing={!this.props.isAppLoaded} onRefresh={this.refresh} />}
                     data={Object.values(this.props.modules)}
-                    keyExtractor={(item) => item.modId.toString()}
+                    keyExtractor={(item) => item._id.toString()}
 
                     renderItem={({ item }) => <Module
                         mod={item}
@@ -152,7 +161,7 @@ export default class MainScreen extends React.PureComponent {
                         data={Object.values(this.props.presets)}
                         keyExtractor={(item) => item._id.toString()}
 
-                        renderItem={({ item }) => <Preset
+                        renderItem={({ item }) => <PresetComponent
                             preset={item}
                             
                             setPresetMode={() => {
@@ -169,6 +178,8 @@ export default class MainScreen extends React.PureComponent {
         // </ScrollView>
     }
 }
+
+export default connector(MainScreen)
 
 const styles = StyleSheet.create({
     // Main container of this screen

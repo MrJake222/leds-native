@@ -1,5 +1,5 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 
 import {
     StyleSheet,
@@ -8,26 +8,29 @@ import {
     View,
     Text,
 } from 'react-native'
-import CardView from '../elements/CardView';
+import CardView from './CardView';
 import IndicatorHelper from '../indicator/IndicatorHelper';
+import RootState from '../redux/RootState';
 
-const mapStateToProps = (state) => ({
+const mapStateToProps = (state: RootState) => ({
     serverAddress: state.serverData.serverAddress,
 
     connected: state.serverData.connected,
     connectionStatus: state.serverData.connectionStatus,
 })
 
+const connector = connect(mapStateToProps)
+
 /**
  * Keeps the CardView displaying the current server status
  */
-class ServerStatus extends React.PureComponent {
+class ServerStatus extends React.PureComponent<ConnectedProps<typeof connector>> {
     render() {
         // console.log("ServerStatus")
 
         return <CardView
             style={styles.container}
-            contentStyles={styles.contents} 
+            contentStyle={styles.contents} 
             indicator={IndicatorHelper.indicator("color").create({...serverStatusColor, hue: this.props.connected ? 120 : 0})}>
             
                 <View style={styles.titleBar}>
@@ -42,7 +45,7 @@ class ServerStatus extends React.PureComponent {
     }
 }
 
-export default connect(mapStateToProps)(ServerStatus)
+export default connector(ServerStatus)
 
 const serverStatusColor = {hue: 0, saturation: 50, lightness: 50}
 

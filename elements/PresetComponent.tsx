@@ -1,51 +1,64 @@
 import React from 'react'
-import { connect } from 'react-redux'
+import { connect, ConnectedProps } from 'react-redux'
 
 import {
     StyleSheet,
 
     Text,
     ToastAndroid,
-    Alert
+    Alert,
+    ViewStyle
 } from 'react-native'
 import CardView from './CardView';
-import getSelectionColor from '../indicator/getSelectionColor';
 import { socketGlobal } from '../network/socket';
 import { removeFromStorarge } from '../network/updateDatabase';
 import { presetDelete, appSelectPreset } from '../redux/actions';
 import IndicatorHelper from '../indicator/IndicatorHelper';
+import RootState from '../redux/RootState';
+import Preset from '../types/Preset';
+import ModType from '../types/ModType';
 
-const mapStateToProps = (state) => ({
+interface PresetOwnProps {
+    preset: Preset
+
+    setPresetMode: () => void
+}
+
+const mapStateToProps = (state: RootState) => ({
     selectedPreset: state.appStatus.selectedPreset,
 
     modTypes: state.modTypes,
 })
 
-const mapDispatchToProps = (dispatch) => ({
-    selectPreset: (preset) => dispatch(appSelectPreset(preset)),
-    deletePreset: (id) => dispatch(presetDelete(id)),
-})
+const mapDispatchToProps = {
+    selectPreset: (preset: Preset) => appSelectPreset(preset),
+    deletePreset: (presetId: string) => presetDelete(presetId),
+}
 
-class Preset extends React.Component {
+const connector = connect(mapStateToProps, mapDispatchToProps)
+type PresetProps = ConnectedProps<typeof connector> & PresetOwnProps
+
+class PresetComponent extends React.Component<PresetProps> {
     render() {
-        let { _id, presetName, modType, values } = this.props.preset
-        modType = this.props.modTypes[modType]
+        const { _id, presetName, modType, values } = this.props.preset
+        const modTypeObject: ModType = this.props.modTypes[modType]
 
         const { selectedPreset } = this.props
-        let bgColor = null
+        let bgColor: string | null = null
 
         const presetMode = selectedPreset !== null
-        const selected = presetMode && this.props.selectedPreset._id == _id
+        const selected = presetMode && this.props.selectedPreset!._id == _id
+
+        // console.log("selectedPreset", selectedPreset)
 
         if (selected)
-            bgColor = getSelectionColor(modType, this.props.preset)
+            bgColor = IndicatorHelper.indicatorMod(modTypeObject).selectionColor(this.props.preset)
+            // bgColor = getSelectionColor(modType, this.props.preset)
 
         return <CardView
             style={styles.container}
-            contentStyles={[styles.contents, { backgroundColor: bgColor }]}
-            indicator={IndicatorHelper.indicatorMod(modType).create(values)}
-            // indicatorHeight={8}
-            // indicatorData={values}
+            contentStyle={[styles.contents, { backgroundColor: bgColor } as ViewStyle]}
+            indicator={IndicatorHelper.indicatorMod(modTypeObject).create(values)}
 
             onPress={() => {
                 this.props.selectPreset(this.props.preset)
@@ -78,7 +91,7 @@ class Preset extends React.Component {
     }
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(Preset)
+export default connector(PresetComponent)
 
 const styles = StyleSheet.create({
     container: {
