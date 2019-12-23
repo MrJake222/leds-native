@@ -6,12 +6,12 @@ import ModType from "../types/ModType";
 export const APP_INITIALIZE = "APP_INITIALIZE"
 export const APP_LOAD_STATE = "APP_LOAD_STATE"
 export const APP_LOAD_ALL_STATES = "APP_LOAD_ALL_STATES"
+export const APP_CONNECTION_FAILED = "APP_CONNECTION_FAILED"
 export const APP_CLEAR_DATA = "APP_CLEAR_DATA"
 export const APP_SELECT_PRESET = "APP_SELECT_PRESET"
 export const APP_SELECT_MODULE = "APP_SELECT_MODULE"
 export const APP_DESELECT_MODULE = "APP_DESELECT_MODULE"
 export const APP_DESELECT_ALL_MODULES = "APP_DESELECT_ALL_MODULES"
-export const APP_SET_STATUS = "APP_SET_STATUS"
 
 export const SERVER_UPDATE_CONFIG = "SERVER_UPDATE_CONFIG"
 export const SERVER_UPDATE_CONNECTION_STATUS = "SERVER_UPDATE_CONNECTION_STATUS"
@@ -55,6 +55,13 @@ interface AppLoadAllStates {
     state: boolean
 }
 
+interface AppConnectionFailed {
+    type: "APP_CONNECTION_FAILED"
+
+    connectionFailed: boolean
+    connectionRetryTimeout: number
+}
+
 interface AppSelectPreset {
     type: "APP_SELECT_PRESET"
 
@@ -84,7 +91,7 @@ interface AppSetStatus {
 }
 
 export type AppAction =
-    AppInitialize | AppLoadState | AppLoadAllStates |
+    AppInitialize | AppLoadState | AppLoadAllStates | AppConnectionFailed |
     AppSelectPreset | AppSelectModule | AppDeselectModule |
     AppDeselectAllModules | AppSetStatus
 

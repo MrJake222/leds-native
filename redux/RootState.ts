@@ -2,12 +2,15 @@ import Preset from "../types/Preset";
 import Module from "../types/Module";
 import ModField from "../types/ModField";
 import ModType from "../types/ModType";
+import { number } from "prop-types";
 
 export default interface RootState {
     appStatus: {
         isAppInitialized: boolean
         isAppLoaded: boolean
-        statusString: string
+
+        connectionFailed: boolean
+        connectionRetryTimeout: number
 
         loadStates: {[key: string]: boolean}
         selectedPreset: Preset | null
@@ -32,11 +35,19 @@ export default interface RootState {
 export function getDefaultState(): RootState {
     return {
         appStatus: {
+            // Was the app given address and port information?
             isAppInitialized: false,
+
+            // Had the modules data been loaded?
             isAppLoaded: false,
-    
-            statusString: "",
-    
+
+            // If app doesn't get to connect to the socket in the given amount of time
+            // this is set to true
+            connectionFailed: false,
+
+            // Seconds left to another socket connection check
+            connectionRetryTimeout: 5,
+        
             /**
              * Indicates if app loaded given prop
              */
@@ -75,3 +86,14 @@ export function getDefaultState(): RootState {
         presets: {},
     }
 }
+
+// export const getOffPreset: (() => Preset) = () => ({
+//     _id: "off",
+//     presetName: "Off",
+//     modType: "LED-RGB",
+//     values: {
+//         hue: 0,
+//         saturation: 0,
+//         lightness: 0
+//     }
+// })

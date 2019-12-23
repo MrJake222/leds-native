@@ -12,11 +12,11 @@ import {
 import NamedInput from '../../elements/NamedInput';
 import NamedPicker from '../../elements/NamedPicker';
 import { modAddModule } from '../../redux/actions';
-import { socketGlobal } from '../../network/socket';
 import { validateModuleData } from '../../helpers';
 import RootState from '../../redux/RootState';
 import Module from '../../types/Module';
 import { NavigationScreenProp, NavigationRoute } from 'react-navigation';
+import { socket } from '../../network/Socket';
 
 const mapStateToProps = (state: RootState) => ({
     modTypes: state.modTypes,
@@ -63,25 +63,12 @@ class AddModuleScreen extends React.Component<AddModuleScreenProps, AddModuleScr
 
     create() {
         const address = parseInt(this.state.modAddress)
-        
         var addressList = Object.values(this.props.modules).map((mod) => mod.modAddress)
 
-        if (socketGlobal.connected) {
-
-            if (validateModuleData(this.state.modName, address, addressList)) {
-                
-                socketGlobal.emit("addModule", {
-                    modAddress: address,
-                    modName: this.state.modName,
-                    modType: this.state.modType
-                })
-
+        if (validateModuleData(this.state.modName, address, addressList)) {
+            if (socket.addModule(address, this.state.modName, this.state.modType)) {
                 this.props.navigation.navigate("MainScreen")
             }
-        }
-
-        else {
-            ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
         }
     }
 

@@ -1,4 +1,4 @@
-import { AppAction, APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, ServerAction, ModuleAction, MOD_ADD_MODULE, MOD_DELETE_MODULE, APP_CLEAR_DATA, MOD_NAME_ADDRESS_UPDATE, FieldAction, MOD_ADD_FIELD, TypeAction, MOD_ADD_TYPE, ValuesAction, MOD_ADD_VALUES, MOD_FIELD_UPDATE, PRESET_ADD, PRESET_DELETE, PresetAction } from "./actionTypes";
+import { AppAction, APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_CONNECTION_FAILED, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, ServerAction, ModuleAction, MOD_ADD_MODULE, MOD_DELETE_MODULE, APP_CLEAR_DATA, MOD_NAME_ADDRESS_UPDATE, FieldAction, MOD_ADD_FIELD, TypeAction, MOD_ADD_TYPE, ValuesAction, MOD_ADD_VALUES, MOD_FIELD_UPDATE, PRESET_ADD, PRESET_DELETE, PresetAction } from "./actionTypes";
 import RootState, { getDefaultState } from "./RootState";
 import { Reducer } from "react";
 
@@ -38,6 +38,14 @@ function appStatus(appStatus: RootState["appStatus"], action: AppAction) {
 
                 isAppLoaded: action.state,
                 loadStates: loadStates2
+            }
+
+        
+        case APP_CONNECTION_FAILED:
+            return {
+                ...appStatus,
+                connectionFailed: action.connectionFailed,
+                connectionRetryTimeout: action.connectionRetryTimeout
             }
 
         case APP_SELECT_PRESET:

@@ -16,20 +16,17 @@ import {
 } from 'react-native'
 
 import CardView from '../../elements/CardView';
-import getIndicator from '../../indicator/IndicatorHelper';
 import { modFieldUpdate, modDeleteModule, modNameAddressUpdate } from '../../redux/actions';
-import { socketGlobal } from '../../network/socket';
 import { validateModuleData, leadingZero } from '../../helpers';
 import { removeFromStorarge } from '../../network/updateDatabase';
 import FieldHelper from '../../field/FieldHelper';
 import RootState from '../../redux/RootState';
-import { NavigationStackProp } from 'react-navigation-stack';
 import store from '../../redux/store';
 import Module from '../../types/Module';
 import { NavigationScreenProp, NavigationRoute } from 'react-navigation';
 import IndicatorHelper from '../../indicator/IndicatorHelper';
 import NamedInput from '../../elements/NamedInput';
-import { Color } from 'csstype';
+import { socket } from '../../network/Socket';
 
 const mapStateToProps = (state: RootState) => ({
     modFields: state.modFields,
@@ -42,11 +39,11 @@ const mapDispatchToProps = {
     updateNameAddress: (modId: string, modAddress: number, modName: string) => modNameAddressUpdate(modId, modAddress, modName),
 }
 
-interface NavigationParams {
+export interface ModuleScreenNavigationParams {
     mod: Module
 }
 
-type NavigationProps = NavigationScreenProp<NavigationRoute<NavigationParams>, NavigationParams>
+type NavigationProps = NavigationScreenProp<NavigationRoute<ModuleScreenNavigationParams>, ModuleScreenNavigationParams>
 
 interface ModuleScreenOwnProps {
     navigation: NavigationProps
@@ -70,25 +67,20 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                 var proceed = () => {
                     const { _id } = navigation.getParam("mod")
 
-                    navigation.goBack()
-                    store.dispatch(modDeleteModule(_id))
-                    socketGlobal.emit("deleteModule", { modId: _id })
-                    removeFromStorarge("modules", _id)
+                    if (socket.deleteModule(_id)) {
+                        navigation.goBack()
+                        store.dispatch(modDeleteModule(_id))
+                        removeFromStorarge("modules", _id)
+                    }                    
                 }
 
-                if (socketGlobal.connected) {
-                    Alert.alert(
-                        "Are you sure?",
-                        "You're deleting module " + navigation.getParam("mod").modName, [
-                            { text: "Cancel" },
-                            { text: "Delete", onPress: proceed }
-                        ]
-                    )
-                }
-
-                else {
-                    ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
-                }
+                Alert.alert(
+                    "Are you sure?",
+                    "You're deleting module " + navigation.getParam("mod").modName, [
+                        { text: "Cancel" },
+                        { text: "Delete", onPress: proceed }
+                    ]
+                )
             }}>
 
             <Image source={require("../../assets/remove.png")} resizeMode="center" style={{ height: "100%", width: 30, marginRight: 8, tintColor: "#FFFFFF" }} />
@@ -118,17 +110,11 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
         const address = this.state.modAddress
         const addressList = Object.values(store.getState().modules).map((mod) => mod.modAddress)
 
-        if (socketGlobal.connected) {
+        if (this.state.modName != modName || this.state.modAddress != modAddress) {
 
-            if (this.state.modName != modName || this.state.modAddress != modAddress) {
-
-                if (validateModuleData(this.state.modName, address, addressList, true)) {
+            if (validateModuleData(this.state.modName, address, addressList, true)) {
+                if (socket.updateModule(_id, this.state.modName, address)) {
                     this.props.updateNameAddress(_id, address, this.state.modName)
-                    socketGlobal.emit("updateModule", {
-                        modId: _id,
-                        modName: this.state.modName,
-                        modAddress: address
-                    })
 
                     this.props.navigation.setParams({
                         mod: {
@@ -139,72 +125,40 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                     })
                 }
             }
-
-            else {
-                ToastAndroid.show("Change something", ToastAndroid.SHORT);
-            }
         }
 
         else {
-            ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
+            ToastAndroid.show("Change something", ToastAndroid.SHORT);
         }
     }
 
     updateField(codename: string, value: any) {
         const { _id, modAddress, modType } = this.props.navigation.getParam("mod")
 
-        if (socketGlobal.connected) {
+        if (socket.updateModField(_id, modAddress, modType, codename, value)) {
             this.props.updateModField(_id, codename, value)
             this.props.updateModField(_id, "preset", null)
-
-            // this.setState({
-            //     modValues: {
-            //         ...this.state.modValues,
-            //         [codename]: value
-            //     }
-            // })
-
-            socketGlobal.emit("updateModField", {
-                modId: _id,
-                modAddress: modAddress,
-                modType: modType,
-                codename: codename,
-                value: value
-            })
-        }
-
-        else {
-            ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
         }
     }
 
     addPreset(values: { [codename: string]: any }) {
-        if (socketGlobal.connected) {
+        var { _id, modType } = this.props.navigation.getParam("mod")
 
-            if (this.state.presetName != "") {
-                var { modType } = this.props.navigation.getParam("mod")
+        if (this.state.presetName != "") {
+            values = { ...values }
+            delete values._id
+            delete values.modId
+            delete values.preset
 
-                values = { ...values }
-                delete values._id
-                delete values.modId
-                values.preset = this.state.presetName
-
-                socketGlobal.emit("addPreset", {
-                    presetName: this.state.presetName,
-                    modType: modType,
-                    values: values
-                })
+            if (socket.addPreset(this.state.presetName, _id, modType, values)) {
+                this.props.updateModField(_id, "preset",this.state.presetName)
 
                 this.props.navigation.navigate("MainScreen")
-            }
-
-            else {
-                ToastAndroid.show("Preset name cannot be empty", ToastAndroid.SHORT);
             }
         }
 
         else {
-            ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
+            ToastAndroid.show("Preset name cannot be empty", ToastAndroid.SHORT);
         }
     }
 
@@ -212,6 +166,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
         var { _id, modType, modAddress } = this.props.navigation.getParam("mod")
         const modTypeObject = this.props.modTypes[modType]
         const modValuesObject = this.props.modValues[_id]
+        console.log("modValuesObject", modValuesObject)
         // console.log("ModuleScreen rerender", modId, "hue: " + modFields.hue)        
 
         return <View style={styles.container}>

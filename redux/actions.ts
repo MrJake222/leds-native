@@ -1,13 +1,8 @@
-import { APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_CLEAR_DATA, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, APP_SET_STATUS, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, MOD_ADD_MODULE, MOD_DELETE_MODULE, MOD_CLEAR_MODULES, MOD_ADD_FIELD, MOD_ADD_TYPE, MOD_ADD_VALUES, MOD_NAME_ADDRESS_UPDATE, MOD_FIELD_UPDATE, PRESET_DELETE, PRESET_ADD } from "./actionTypes";
+import { APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_CLEAR_DATA, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, MOD_ADD_MODULE, MOD_DELETE_MODULE, MOD_CLEAR_MODULES, MOD_ADD_FIELD, MOD_ADD_TYPE, MOD_ADD_VALUES, MOD_NAME_ADDRESS_UPDATE, MOD_FIELD_UPDATE, PRESET_DELETE, PRESET_ADD, APP_CONNECTION_FAILED } from "./actionTypes";
 import Preset from "../types/Preset";
 import Module from "../types/Module";
 import ModField from "../types/ModField";
 import ModType from "../types/ModType";
-
-// -----------------------
-// Action types
-
-
 
 // -----------------------
 // Action creators
@@ -45,6 +40,13 @@ export const appLoadAllStates = (state: boolean) => ({
     state: state
 })
 
+export const appConnectionFailed = (connectionFailed: boolean, connectionRetryTimeout: number) => ({
+    type: APP_CONNECTION_FAILED,
+
+    connectionFailed: connectionFailed,
+    connectionRetryTimeout: connectionRetryTimeout
+})
+
 /**
  * Clears all fields
  */
@@ -72,12 +74,6 @@ export const deselectModule = (modId: string) => ({
 
 export const deselectAllModules = () => ({
     type: APP_DESELECT_ALL_MODULES
-})
-
-export const appSetStatus = (statusString: string) => ({
-    type: APP_SET_STATUS,
-
-    statusString: statusString
 })
 
 /**

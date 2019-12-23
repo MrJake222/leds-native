@@ -14,15 +14,16 @@ import {
 
 import ServerStatus from '../../elements/ServerStatus';
 import Module from '../../elements/ModuleComponent';
-import { TouchableOpacity, ScrollView } from 'react-native-gesture-handler';
-import { socketGlobal } from '../../network/socket';
-import { appLoadAllStates, presetAdd, appClearData, deselectAllModules, appSelectPreset } from '../../redux/actions';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { appLoadAllStates, appClearData, deselectAllModules, appSelectPreset } from '../../redux/actions';
 import { rootNavigatorNavigate } from '../../RootNavigatorRef';
-import { NavigationScreenProp } from 'react-navigation';
+import { NavigationScreenProp, NavigationRoute } from 'react-navigation';
 import { ConnectedProps, connect } from 'react-redux';
 import RootState from '../../redux/RootState';
 import Preset from '../../types/Preset';
 import PresetComponent from '../../elements/PresetComponent';
+import { socket } from '../../network/Socket';
+import { NavigationStackScreenProps, NavigationStackProp } from 'react-navigation-stack';
 
 const mapStateToProps = (state: RootState) => {
     return {
@@ -31,6 +32,7 @@ const mapStateToProps = (state: RootState) => {
         selectedModules: state.appStatus.selectedModules,
 
         modules: state.modules,
+        modValues: state.modValues,
         presets: state.presets,
     }
 }
@@ -42,8 +44,16 @@ const mapDispatchToProps = {
     deselectAllModules: () => deselectAllModules(),
 }
 
+export interface MainScreenNavigationParams {
+    applyPreset: (force: boolean) => void
+    headerTitle: string | null
+    presetMode: boolean
+}
+
+type NavigationProps = NavigationScreenProp<NavigationRoute<MainScreenNavigationParams>, MainScreenNavigationParams>
+
 interface MainScreenOwnProps {
-    navigation: NavigationScreenProp<any>
+    navigation: NavigationProps
 }
 
 const connector = connect(mapStateToProps, mapDispatchToProps)
@@ -59,16 +69,18 @@ class MainScreen extends React.PureComponent<MainScreenProps> {
         this.deselectPreset = this.deselectPreset.bind(this)
     }
 
-    static addIcon = (navigation: NavigationScreenProp<any>) => {
-        let onPress = () => navigation.navigate("AddModule")
+    static addIcon = (navigation: NavigationStackProp<NavigationRoute<MainScreenNavigationParams>, MainScreenNavigationParams>) => {
+        let onPress: (() => boolean) | ((force: boolean) => void) = () => navigation.navigate("AddModule")
+        let onLongPress = () => {}
         let source = require("../../assets/add.png")
 
-        if (navigation.state.params && navigation.state.params.presetMode) {
-            onPress = navigation.state.params.applyPreset
+        if (navigation.getParam("presetMode")) {
+            onPress = navigation.getParam("applyPreset")
+            onLongPress = () => navigation.getParam("applyPreset")(true)
             source = require("~/assets/apply.png")
         }
 
-        return <TouchableOpacity activeOpacity={0.5} onPress={onPress}>
+        return <TouchableOpacity activeOpacity={0.5} onPress={onPress} onLongPress={onLongPress}>
             <Image source={source} resizeMode="center" style={{ height: "100%", width: 30, marginRight: 8, tintColor: "#FFF" }} />
         </TouchableOpacity>
     }
@@ -78,24 +90,31 @@ class MainScreen extends React.PureComponent<MainScreenProps> {
         rootNavigatorNavigate("ConnectionWrapper")
 
         this.props.clearData()
-        socketGlobal.emit("forceReload")
+        socket.forceReload()
     }
 
-    applyPreset() {
+    applyPreset(force: boolean) {
         const { _id, presetName } = this.props.selectedPreset!
-        const modules = this.props.selectedModules
+        let modules = this.props.selectedModules 
 
-        if (socketGlobal.connected){
-            ToastAndroid.show("Applying preset " + presetName + " to " + modules.length + " modules", ToastAndroid.SHORT)
+        // Get modules and filter out modules with preset already applied
+        if (!force)
+            modules = modules.filter(_id => this.props.modValues[_id].preset != presetName)
+        
+        if (modules.length > 0) {
+            if (socket.applyPreset(_id, modules)) {
+                ToastAndroid.show("Applying preset " + presetName + " to " + modules.length + " modules", ToastAndroid.SHORT)
+            }
+        }
 
-            socketGlobal.emit("applyPreset", {
-                presetId: _id,
-                modules: modules
-            })
+        else if (this.props.selectedModules.length > 0) {
+            const plural = this.props.selectedModules.length > 1 ? "s" : ""
+
+            ToastAndroid.show("Module"+plural+" already have this preset applied. Hold the apply icon to force.", ToastAndroid.SHORT)
         }
 
         else {
-            ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
+            ToastAndroid.show("No modules selected", ToastAndroid.SHORT)
         }
         
         this.deselectPreset()

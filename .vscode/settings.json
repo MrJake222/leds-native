@@ -9,13 +9,13 @@
     ".watchmanconfig": true,
     ".prettierrc.js": true,
     ".gitignore": true,
-    "app.json": true,
     "babel.config.js": true,
-    "index.js": true,
     "metro.config.js": true,
     "package-lock.json": true,
     "README.md": true,
     "jest.config.js": true,
-    "package.json": true
+    "package.json": true,
+    "index.js": true,
+    "app.json": true
   }
 }

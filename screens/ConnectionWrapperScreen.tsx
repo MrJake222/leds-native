@@ -9,11 +9,15 @@ import {
     FlatList,
     Button,
 
-    AsyncStorage
+    AsyncStorage,
+    TouchableOpacity
 } from 'react-native'
 import { title } from '../helpers';
 import RootState from '../redux/RootState';
 import { NavigationScreenProp } from 'react-navigation';
+import Icon from 'react-native-ionicons'
+import {  } from 'react-native-gesture-handler';
+import { socket } from '../network/Socket';
 // import store from '../redux/store';
 
 // Sorted array
@@ -23,6 +27,8 @@ const mapStateToProps = (state: RootState) => ({
     isAppInitialized: state.appStatus.isAppInitialized,
     isAppLoaded: state.appStatus.isAppLoaded,
     loadStates: state.appStatus.loadStates,
+
+    connectionFailed: state.appStatus.connectionFailed
 })
 
 interface ConnectionWrapperScreenOwnProps {
@@ -41,7 +47,7 @@ class ConnectionWrapperScreen extends React.Component<ConnectionWrapperScreenPro
         console.log("ignoreMount", ignoreMount)
 
         if (!isAppInitialized && !ignoreMount) {
-            this.props.navigation.navigate("AppConfig")
+            this.props.navigation.navigate("AppConfigScreen")
         }
     }
 
@@ -52,27 +58,31 @@ class ConnectionWrapperScreen extends React.Component<ConnectionWrapperScreenPro
     }
 
     render() {
-        var genStatus = (key: string) => {
+        const genStatus = (key: string) => {
             var loaded = this.props.loadStates[key]
             var color = loaded ? "#388E3C" : "#FF5252"
 
             return <Text style={[styles.text, { color: color }]}>{title(key)}</Text>
         }
 
+        const errorBackground = this.props.connectionFailed ? "#FF5252" : "rgba(0,0,0,0)"
+        const errorText = this.props.connectionFailed ? "white" : "rgba(0,0,0,0)"
+        const iconColor = this.props.connectionFailed ? "#404040" : "rgba(0,0,0,0)"
+
         return <View style={styles.container}>
             <ActivityIndicator />
             {/* <Button title="Clear modules" onPress={() => {
                 AsyncStorage.removeItem("modules")
                 AsyncStorage.removeItem("modulesLastModified")
-            }} />
+            }} /> */}
 
-            <Button title="Clear asyncstorage" onPress={() => {
+            {/* <Button title="Clear asyncstorage" onPress={() => {
                 AsyncStorage.clear()
             }} /> */}
 
-            <Button title="Go" onPress={() => {
+            {/* <Button title="Go" onPress={() => {
                 this.props.navigation.navigate("DrawerNavigator")
-            }} />
+            }} /> */}
 
             {this.props.isAppInitialized ? <View style={styles.status}>
                 <FlatList
@@ -82,6 +92,15 @@ class ConnectionWrapperScreen extends React.Component<ConnectionWrapperScreenPro
                     keyExtractor={item => item}
                     renderItem={({ item }) => genStatus(item)}
                 />
+
+                <Text style={[styles.failed, { backgroundColor: errorBackground, color: errorText }]}>Connection failed</Text>
+                <TouchableOpacity activeOpacity={0.7} onPress={() => {
+                    socket.reset()
+                    this.props.navigation.navigate("AppConfigScreen")
+                }}>
+
+                    <Icon name="settings" size={42} style={[styles.icon, { color: iconColor }]} />
+                </TouchableOpacity>
             </View> : null}
         </View>
     }
@@ -105,4 +124,22 @@ const styles = StyleSheet.create({
         letterSpacing: 2,
         marginBottom: 8
     },
+
+    failed: {
+        marginTop: 8,
+
+        color: "white",
+        fontSize: 18,
+        letterSpacing: 2,
+
+        alignSelf: "center",
+        paddingVertical: 4,
+        paddingHorizontal: 8,
+        borderRadius: 4,
+    },
+
+    icon: {
+        marginTop: 16,
+        textAlign: "center"
+    }
 })

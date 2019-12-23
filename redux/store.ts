@@ -4,9 +4,9 @@ import { createStore } from "redux"
 import { reducer } from "./reducers";
 import { appInitialize, serverUpdateConfig } from './actions';
 // import devToolsEnhancer from 'remote-redux-devtools';
-import { initSocketIO } from '../network/socket';
 import RootState, { getDefaultState } from './RootState';
 import devToolsEnhancer, { composeWithDevTools } from 'remote-redux-devtools';
+import { socket } from '../network/Socket';
 
 const store = createStore<RootState, any, {}, {}>(reducer, getDefaultState(),
 
@@ -33,11 +33,18 @@ AsyncStorage.multiGet(["isAppInitialized", "serverAddress", "serverPort"], (err,
         store.dispatch(serverUpdateConfig(res.serverAddress, parseInt(res.serverPort)))
         store.dispatch(appInitialize(res.isAppInitialized == "true"))
 
-        initSocketIO(res.serverAddress, parseInt(res.serverPort), store)
+        console.log("init multiget")
+
+        if (socket.init(res.serverAddress, parseInt(res.serverPort))) {
+            socket.addEvents(store)
+            socket.connect(store)
+
+            // unsubStorage()
+        }
     }
 })
 
-var unsubStorage = store.subscribe(async () => {
+const unsubStorage = store.subscribe(async () => {
     var state = store.getState()
 
     var currentAddress = await AsyncStorage.getItem("serverAddress")
@@ -46,12 +53,21 @@ var unsubStorage = store.subscribe(async () => {
     var currentPort = await AsyncStorage.getItem("serverPort")
     var newPort = state.serverData.serverPort
 
+    // console.log("newAddress", newAddress)
+    // console.log("currentAddress", currentAddress)
+    // console.log("newPort", newPort)
+    // console.log("currentPort", currentPort)
+
     if (newAddress != currentAddress || newPort != parseInt(currentPort!)) {
         AsyncStorage.setItem("isAppInitialized", "true")
         AsyncStorage.setItem("serverAddress", newAddress)
         AsyncStorage.setItem("serverPort", newPort.toString())
 
-        initSocketIO(newAddress, newPort, store)
-        unsubStorage()
+        if (!socket.initialized && socket.init(newAddress, newPort)) {
+            socket.addEvents(store)
+            socket.connect(store)
+        }
+
+        // unsubStorage()
     }
 })

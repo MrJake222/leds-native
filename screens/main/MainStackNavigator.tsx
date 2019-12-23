@@ -1,10 +1,10 @@
 import React from "react"
 import { connect } from 'react-redux'
 import { createAppContainer } from "react-navigation"
-import { createStackNavigator } from "react-navigation-stack";
+import { createStackNavigator, NavigationStackScreenProps } from "react-navigation-stack";
 
-import MainScreen from "./MainScreen"
-import ModuleScreen from "./ModuleScreen";
+import MainScreen, { MainScreenNavigationParams } from "./MainScreen"
+import ModuleScreen, { ModuleScreenNavigationParams } from "./ModuleScreen";
 import AddModule from "./AddModuleScreen";
 
 export default class MainStackNavigator extends React.Component {
@@ -21,11 +21,11 @@ export default class MainStackNavigator extends React.Component {
             createStackNavigator({
                 MainScreen: {
                     screen: MainScreen,
-                    navigationOptions: ({navigation}) => {
+                    navigationOptions: ({navigation}: NavigationStackScreenProps<MainScreenNavigationParams>) => {
                         var title = "Modules"
 
-                        if (navigation.state.params && navigation.state.params.headerTitle)
-                            title = navigation.state.params.headerTitle
+                        if (navigation.getParam("headerTitle"))
+                            title = navigation.getParam("headerTitle")!
 
                         return {
                             title: title,
@@ -37,8 +37,8 @@ export default class MainStackNavigator extends React.Component {
 
                 Module: {
                     screen: ModuleScreen,
-                    navigationOptions: ({navigation}) => ({
-                        title: navigation.state.params.mod.modName,
+                    navigationOptions: ({navigation}: NavigationStackScreenProps<ModuleScreenNavigationParams>) => ({
+                        title: navigation.getParam("mod").modName,
                         headerRight: ModuleScreen.removeIcon(navigation),
                         ...headerStyles
                     })

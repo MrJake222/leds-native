@@ -3,4 +3,5 @@ export default interface Preset {
     presetName: string
     modType: string
     values: {[valueName: string]: any}
+    builtin: boolean
 }

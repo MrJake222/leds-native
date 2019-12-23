@@ -10,13 +10,13 @@ import {
     ViewStyle
 } from 'react-native'
 import CardView from './CardView';
-import { socketGlobal } from '../network/socket';
 import { removeFromStorarge } from '../network/updateDatabase';
 import { presetDelete, appSelectPreset } from '../redux/actions';
 import IndicatorHelper from '../indicator/IndicatorHelper';
 import RootState from '../redux/RootState';
 import Preset from '../types/Preset';
 import ModType from '../types/ModType';
+import { socket } from '../network/Socket';
 
 interface PresetOwnProps {
     preset: Preset
@@ -40,7 +40,7 @@ type PresetProps = ConnectedProps<typeof connector> & PresetOwnProps
 
 class PresetComponent extends React.Component<PresetProps> {
     render() {
-        const { _id, presetName, modType, values } = this.props.preset
+        const { _id, presetName, modType, values, builtin } = this.props.preset
         const modTypeObject: ModType = this.props.modTypes[modType]
 
         const { selectedPreset } = this.props
@@ -65,25 +65,26 @@ class PresetComponent extends React.Component<PresetProps> {
                 this.props.setPresetMode()
             }}
 
-            onLongPress={() =>
-                Alert.alert(
-                    "Are you sure?",
-                    "You're deleting preset " + presetName, [
-                        { text: "Cancel" },
-                        { text: "Delete", onPress: () => {
-                            if (socketGlobal.connected) {
-                                socketGlobal.emit("deletePreset", { _id: _id })
-                                this.props.deletePreset(_id)
-                                removeFromStorarge("presets", _id)
-                            }
+            onLongPress={() => {
+                if (builtin) {
+                    ToastAndroid.show("You cannot delete built-in preset " + presetName, ToastAndroid.SHORT)
+                }
 
-                            else {
-                                ToastAndroid.show("Socket disconnected", ToastAndroid.SHORT)
-                            }
-                        }}
-                    ]
-                )
-            }>
+                else {
+                    Alert.alert(
+                        "Are you sure?",
+                        "You're deleting preset " + presetName, [
+                            { text: "Cancel" },
+                            { text: "Delete", onPress: () => {
+                                if (socket.deletePreset(_id)) {
+                                    this.props.deletePreset(_id)
+                                    removeFromStorarge("presets", _id)
+                                }
+                            }}
+                        ]
+                    )
+                }
+            }}>
 
             {/* <Text style={styles.type}>{modType.codename}</Text> */}
             <Text style={styles.name}>{presetName}</Text>

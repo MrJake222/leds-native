@@ -15,6 +15,11 @@ import { connect, ConnectedProps } from 'react-redux';
 import { NavigationScreenProp } from 'react-navigation';
 import { checkIPAddress, checkPort } from '../helpers';
 
+const mapStateToProps = (state: RootState) => ({
+    address: state.serverData.serverAddress,
+    port: state.serverData.serverPort
+})
+
 const mapDispatchToProps = {
     serverUpdateConfig: (address: string, port: number) => serverUpdateConfig(address, port),
     appInitialize: () => appInitialize(true)
@@ -29,7 +34,7 @@ interface AppConfigScreenState {
     port: string
 }
 
-const connector = connect(null, mapDispatchToProps)
+const connector = connect(mapStateToProps, mapDispatchToProps)
 type AppConfigScreenProps = ConnectedProps<typeof connector> & AppConfigScreenOwnProps
 
 class AppConfigScreen extends React.Component<AppConfigScreenProps, AppConfigScreenState> {
@@ -37,8 +42,8 @@ class AppConfigScreen extends React.Component<AppConfigScreenProps, AppConfigScr
         super(props)
 
         this.state = {
-            address: "",
-            port: ""
+            address: props.address,
+            port: props.port != -1 ? props.port.toString() : ""
         }
 
         this.updateValues = this.updateValues.bind(this)
@@ -76,7 +81,7 @@ class AppConfigScreen extends React.Component<AppConfigScreenProps, AppConfigScr
 
                             this.props.serverUpdateConfig(this.state.address, parseInt(this.state.port))
                             this.props.appInitialize()
-                            this.props.navigation.navigate("ConnectionWrapper", {ignoreMount: true})
+                            this.props.navigation.navigate("ConnectionWrapperScreen", {ignoreMount: true})
                         }}/>   
                     </View>
                 </View>
