@@ -87,7 +87,7 @@ class MainScreen extends React.PureComponent<MainScreenProps> {
 
     refresh() {
         this.props.deloadApp()
-        rootNavigatorNavigate("ConnectionWrapper")
+        rootNavigatorNavigate("ConnectionWrapperScreen")
 
         this.props.clearData()
         socket.forceReload()

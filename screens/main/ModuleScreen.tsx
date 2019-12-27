@@ -166,7 +166,6 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
         var { _id, modType, modAddress } = this.props.navigation.getParam("mod")
         const modTypeObject = this.props.modTypes[modType]
         const modValuesObject = this.props.modValues[_id]
-        console.log("modValuesObject", modValuesObject)
         // console.log("ModuleScreen rerender", modId, "hue: " + modFields.hue)        
 
         return <View style={styles.container}>

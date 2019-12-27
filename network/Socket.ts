@@ -85,23 +85,18 @@ class Socket {
          */
         this.socket.on("added", async ({ fieldName, docs, getAll }: { fieldName: string, docs: any[], getAll: boolean }) => {
 
-            // First, read current AsyncStorage content
-            const storageDocsRaw = await AsyncStorage.getItem(fieldName)
-            const storageDocs = JSON.parse(storageDocsRaw!) || {}
+            let storageDocs: {[key: string]: any} = {}
 
-            // if (fieldName == "modules")
-            //     console.log(docs)
+            // If not getAll, read current AsyncStorage content
+            if (!getAll) {
+                const storageDocsRaw = await AsyncStorage.getItem(fieldName)
+                storageDocs = JSON.parse(storageDocsRaw!)
+            }
 
             docs.forEach((doc) => {
-                // if (fieldName == "modules")
-                //     doc.modId = doc._id
-
                 addToStore(fieldName, doc)
                 storageDocs[doc._id] = doc
             })
-
-            // if (fieldName == "modules")
-            //     console.log("storageDocs", storageDocs)
 
             // Set AsyncStorage contents and update LastModified
             AsyncStorage.setItem(fieldName, JSON.stringify(storageDocs))

@@ -13,6 +13,7 @@ import { selectModule, deselectModule } from '../redux/actions';
 import IndicatorHelper from '../indicator/IndicatorHelper';
 import Module from '../types/Module';
 import RootState from '../redux/RootState';
+import store from '../redux/store';
 
 const mapStateToProps = (state: RootState) => ({
     selectedPreset: state.appStatus.selectedPreset,
