@@ -1,4 +1,4 @@
-import { APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_CLEAR_DATA, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, MOD_ADD_MODULE, MOD_DELETE_MODULE, MOD_CLEAR_MODULES, MOD_ADD_FIELD, MOD_ADD_TYPE, MOD_ADD_VALUES, MOD_NAME_ADDRESS_UPDATE, MOD_FIELD_UPDATE, PRESET_DELETE, PRESET_ADD, APP_CONNECTION_FAILED } from "./actionTypes";
+import { APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_CLEAR_DATA, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, MOD_ADD_MODULE, MOD_DELETE_MODULE, MOD_CLEAR_MODULES, MOD_ADD_FIELD, MOD_ADD_TYPE, MOD_ADD_VALUES, MOD_NAME_UPDATE, MOD_FIELD_UPDATE, PRESET_DELETE, PRESET_ADD, APP_CONNECTION_FAILED, MOD_ADDRESS_UPDATE } from "./actionTypes";
 import Preset from "../types/Preset";
 import Module from "../types/Module";
 import ModField from "../types/ModField";
@@ -171,14 +171,19 @@ export const modAddValues = (modValues: {[key: string]: any}) => ({
  * Updates module data
  * 
  * @param {*} modName Module's new name 
- * @param {*} modAddress Module's new address
  */
-export const modNameAddressUpdate = (modId: string, modAddress: number, modName: string) => ({
-    type: MOD_NAME_ADDRESS_UPDATE,
+export const modNameUpdate = (modId: string, modName: string) => ({
+    type: MOD_NAME_UPDATE,
 
     modId: modId,
-    modAddress: modAddress,
     modName: modName
+})
+
+export const modAddressUpdate = (modId: string, modAddress: number) => ({
+    type: MOD_ADDRESS_UPDATE,
+
+    modId: modId,
+    modAddress: modAddress
 })
 
 /**

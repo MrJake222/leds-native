@@ -17,8 +17,8 @@ import {
 } from 'react-native'
 
 import CardView from '../../elements/CardView';
-import { modFieldUpdate, modDeleteModule, modNameAddressUpdate } from '../../redux/actions';
-import { validateModuleData, leadingZero } from '../../helpers';
+import { modFieldUpdate, modDeleteModule, modNameUpdate } from '../../redux/actions';
+import { validateModuleName, validateModuleAddress, leadingZero } from '../../helpers';
 import { removeFromStorarge } from '../../network/updateDatabase';
 import FieldHelper from '../../field/FieldHelper';
 import RootState from '../../redux/RootState';
@@ -37,7 +37,7 @@ const mapStateToProps = (state: RootState) => ({
 
 const mapDispatchToProps = {
     updateModField: (modId: string, item: string, value: any) => modFieldUpdate(modId, item, value),
-    updateNameAddress: (modId: string, modAddress: number, modName: string) => modNameAddressUpdate(modId, modAddress, modName),
+    updateName: (modId: string, modName: string) => modNameUpdate(modId, modName),
 }
 
 export interface ModuleScreenNavigationParams {
@@ -52,7 +52,7 @@ interface ModuleScreenOwnProps {
 
 interface ModuleScreenState {
     modName: string
-    modAddress: number,
+    modAddress: string,
     presetName: string,
     modValues: { [codename: string]: any },
     addressChangePacket: boolean
@@ -96,34 +96,56 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
 
         this.state = {
             modName: modName,
-            modAddress: modAddress,
+            modAddress: modAddress.toString(),
             presetName: "",
             modValues: props.modValues[_id],
             addressChangePacket: false
         }
 
-        this.apply = this.apply.bind(this)
+        this.updateName = this.updateName.bind(this)
+        this.updateAddress = this.updateAddress.bind(this)
         this.updateField = this.updateField.bind(this)
         this.addPreset = this.addPreset.bind(this)
     }
 
-    apply() {
-        const { _id, modAddress, modName } = this.props.navigation.getParam("mod")
+    updateName() {
+        const { _id, modName } = this.props.navigation.getParam("mod")
 
-        const address = this.state.modAddress
         const addressList = Object.values(store.getState().modules).map((mod) => mod.modAddress)
 
-        if (this.state.modName != modName || this.state.modAddress != modAddress) {
+        if (this.state.modName != modName) {
 
-            if (validateModuleData(this.state.modName, address, addressList, true)) {
-                if (socket.updateModule(_id, this.state.modName, address, this.state.addressChangePacket)) {
-                    this.props.updateNameAddress(_id, address, this.state.modName)
+            if (validateModuleName(this.state.modName)) {
+                if (socket.updateModuleName(_id, this.state.modName)) {
+                    this.props.updateName(_id, this.state.modName)
 
                     this.props.navigation.setParams({
                         mod: {
                             ...this.props.navigation.getParam("mod"),
                             modName: this.state.modName,
-                            modAddress: address
+                        }
+                    })
+                }
+            }
+        }
+
+        else {
+            ToastAndroid.show("Change something", ToastAndroid.SHORT);
+        }
+    }
+
+    updateAddress() {
+        const { _id, modAddress } = this.props.navigation.getParam("mod")
+        const newAddress = parseInt(this.state.modAddress)
+        const addressList = Object.values(store.getState().modules).map((mod) => mod.modAddress)
+
+        if (newAddress != modAddress) {
+            if (validateModuleAddress(modAddress, addressList, true)) {
+                if (socket.updateModuleAddress(_id, newAddress)) {
+                    this.props.navigation.setParams({
+                        mod: {
+                            ...this.props.navigation.getParam("mod"),
+                            modAddress: newAddress,
                         }
                     })
                 }
@@ -201,19 +223,8 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                     <Text style={styles.topRight}>Properties</Text>
 
                     <NamedInput name="Module's name" value={this.state.modName} onChangeText={(value: string) => this.setState({ modName: value })} />
-                    <NamedInput name="Module's address" value={this.state.modAddress.toString()} keyboardType="numeric" onChangeText={(value: string) => this.setState({ modAddress: parseInt(value) })} />
 
-                    <View style={styles.switchView}>
-                        <View style={styles.switchText}>
-                            <Text>Send address change packet</Text>
-                        </View>
-
-                        <View style={styles.switch}>
-                            <Switch value={this.state.addressChangePacket} onValueChange={value => this.setState({addressChangePacket: value})} />
-                        </View>
-                    </View>
-
-                    <Button title="Save" color="#4CAF50" onPress={this.apply} />
+                    <Button title="Save" color="#4CAF50" onPress={this.updateName} />
                 </CardView>
 
                 <CardView
@@ -227,6 +238,19 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                     <Button title="Create preset" color="#4CAF50" onPress={() => this.addPreset(modValuesObject)} />
                 </CardView>
             </View>
+
+            <View style={styles.containerInner}>
+                <View style={[{ width: "50%", paddingRight: 6, paddingTop: 12 }]}>
+
+                    <CardView contentStyle={styles.contents}>
+                        <Text style={styles.topRight}>Address</Text>
+                        <NamedInput name="Module's address" value={this.state.modAddress} keyboardType="numeric" onChangeText={(value: string) => this.setState({ modAddress: value })} />
+                        <Text style={styles.warn}>Warning: This will also change the Modbus address of the device</Text>
+
+                        <Button title="Change" color="#4CAF50" onPress={this.updateAddress} />
+                    </CardView>
+                </View>
+            </View>
         </View>
     }
 }
@@ -239,7 +263,7 @@ const styles = StyleSheet.create({
         marginHorizontal: 8,
         marginVertical: 4,
 
-        flex: 1,
+        flex: 1,     
     },
 
     cardview: {
@@ -247,8 +271,7 @@ const styles = StyleSheet.create({
     },
 
     containerInner: {
-        flex: 1,
-        flexDirection: "row"
+        flexDirection: "row",
     },
 
     cardviewInner: {
@@ -270,20 +293,9 @@ const styles = StyleSheet.create({
         color: "#757575"
     },
 
-    switchView: {
-        flexDirection: "row",
-        marginTop: 4,
-        marginBottom: 12,
-        marginHorizontal: 10,
-    },
-
-    switchText: {
-        flex: 1,
-    },
-
-    switch: {
-        flexShrink: 1,
-
-        justifyContent: "center"
+    warn: {
+        color: "#757575",
+        textAlign: "center",
+        marginBottom: 8
     }
 })

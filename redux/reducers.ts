@@ -1,4 +1,4 @@
-import { AppAction, APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_CONNECTION_FAILED, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, ServerAction, ModuleAction, MOD_ADD_MODULE, MOD_DELETE_MODULE, APP_CLEAR_DATA, MOD_NAME_ADDRESS_UPDATE, FieldAction, MOD_ADD_FIELD, TypeAction, MOD_ADD_TYPE, ValuesAction, MOD_ADD_VALUES, MOD_FIELD_UPDATE, PRESET_ADD, PRESET_DELETE, PresetAction } from "./actionTypes";
+import { AppAction, APP_INITIALIZE, APP_LOAD_STATE, APP_LOAD_ALL_STATES, APP_CONNECTION_FAILED, APP_SELECT_PRESET, APP_SELECT_MODULE, APP_DESELECT_MODULE, APP_DESELECT_ALL_MODULES, SERVER_UPDATE_CONFIG, SERVER_UPDATE_CONNECTION_STATUS, ServerAction, ModuleAction, MOD_ADD_MODULE, MOD_DELETE_MODULE, APP_CLEAR_DATA, MOD_NAME_UPDATE, FieldAction, MOD_ADD_FIELD, TypeAction, MOD_ADD_TYPE, ValuesAction, MOD_ADD_VALUES, MOD_FIELD_UPDATE, PRESET_ADD, PRESET_DELETE, PresetAction, MOD_ADDRESS_UPDATE } from "./actionTypes";
 import RootState, { getDefaultState } from "./RootState";
 import { Reducer } from "react";
 
@@ -121,7 +121,7 @@ function modules(modules: RootState["modules"], action: ModuleAction) {
         case APP_CLEAR_DATA:
             return {}
 
-        case MOD_NAME_ADDRESS_UPDATE:
+        case MOD_NAME_UPDATE:
             return {
                 ...modules,
 
@@ -129,7 +129,17 @@ function modules(modules: RootState["modules"], action: ModuleAction) {
                     ...modules[action.modId],
 
                     modName: action.modName,
-                    modAddress: action.modAddress
+                }
+            }
+
+        case MOD_ADDRESS_UPDATE:
+            return {
+                ...modules,
+
+                [action.modId]: {
+                    ...modules[action.modId],
+
+                    modAddress: action.modAddress,
                 }
             }
 

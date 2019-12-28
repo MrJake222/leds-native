@@ -12,11 +12,11 @@ import {
 import NamedInput from '../../elements/NamedInput';
 import NamedPicker from '../../elements/NamedPicker';
 import { modAddModule } from '../../redux/actions';
-import { validateModuleData } from '../../helpers';
 import RootState from '../../redux/RootState';
 import Module from '../../types/Module';
 import { NavigationScreenProp, NavigationRoute } from 'react-navigation';
 import { socket } from '../../network/Socket';
+import { validateModuleName, validateModuleAddress } from '../../helpers';
 
 const mapStateToProps = (state: RootState) => ({
     modTypes: state.modTypes,
@@ -63,7 +63,7 @@ class AddModuleScreen extends React.Component<AddModuleScreenProps, AddModuleScr
         const address = parseInt(this.state.modAddress)
         var addressList = Object.values(this.props.modules).map((mod) => mod.modAddress)
 
-        if (validateModuleData(this.state.modName, address, addressList)) {
+        if (validateModuleName(this.state.modName) && validateModuleAddress(address, addressList)) {
             if (socket.addModule(address, this.state.modName)) {
                 this.props.navigation.navigate("MainScreen")
             }

@@ -1,5 +1,5 @@
 import SocketIOClient from 'socket.io-client'
-import { serverUpdateConnectionStatus, modDeleteModule, modNameAddressUpdate, modFieldUpdate, appLoadState, presetDelete, appConnectionFailed } from '../redux/actions';
+import { serverUpdateConnectionStatus, modDeleteModule, modNameUpdate, modFieldUpdate, appLoadState, presetDelete, appConnectionFailed, modAddressUpdate } from '../redux/actions';
 
 import { loadDatabase, addToStore, removeFromStorarge } from './updateDatabase';
 import { AsyncStorage, ToastAndroid } from 'react-native'
@@ -142,8 +142,24 @@ class Socket {
             }
         })
 
-        this.socket.on("updateModule", ({ modId, modAddress, modName }: { modId: string, modAddress: number, modName: string }) => {
-            store.dispatch(modNameAddressUpdate(modId, modAddress, modName))
+        this.socket.on("updateModuleName", ({ modId, modName }: { modId: string, modName: string }) => {
+            store.dispatch(modNameUpdate(modId, modName))
+        })
+
+        this.socket.on("updateModuleAddress", ({ modId, newModAddress }: { modId: string, newModAddress: number }) => {
+            ToastAndroid.show("Address successfully updated to " + newModAddress, ToastAndroid.SHORT)
+            store.dispatch(modAddressUpdate(modId, newModAddress))
+        })
+
+        this.socket.on("updateModuleAddressFailed", ({ reason }: { reason: string }) => {
+            switch (reason) {
+                case "timeout":
+                    ToastAndroid.show("Timeout sending the update packet. Check address and connections.", ToastAndroid.LONG)
+                    break
+
+                default:
+                    ToastAndroid.show("Unknown error. See server console for details.", ToastAndroid.LONG)
+            }
         })
 
         this.socket.on("updateModField", ({ modId, codename, value }: { modId: string, codename: string, value: any }) => {
@@ -199,13 +215,24 @@ class Socket {
         return false
     }
 
-    updateModule(_id: string, modName: string, modAddress: number, addressChangePacket: boolean): boolean {
+    updateModuleName(_id: string, modName: string): boolean {
         if (this.checkConnetionWithToast()) {
-            this.socket.emit("updateModule", {
+            this.socket.emit("updateModuleName", {
                 modId: _id,
-                modName: modName,
-                modAddress: modAddress,
-                addressChangePacket: addressChangePacket
+                modName: modName
+            })
+
+            return true
+        }
+
+        return false
+    }
+
+    updateModuleAddress(_id: string, newModAddress: number): boolean {
+        if (this.checkConnetionWithToast()) {
+            this.socket.emit("updateModuleAddress", {
+                modId: _id,
+                newModAddress: newModAddress
             })
 
             return true

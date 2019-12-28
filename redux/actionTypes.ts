@@ -24,7 +24,8 @@ export const MOD_ADD_TYPE = "MOD_ADD_TYPE"
 export const MOD_ADD_VALUES = "MOD_ADD_VALUES"
 
 export const MOD_FIELD_UPDATE = "MOD_FIELD_UPDATE"
-export const MOD_NAME_ADDRESS_UPDATE = "MOD_NAME_ADDRESS_UPDATE"
+export const MOD_NAME_UPDATE = "MOD_NAME_UPDATE"
+export const MOD_ADDRESS_UPDATE = "MOD_ADDRESS_UPDATE"
 
 export const PRESET_ADD = "PRESET_ADD"
 export const PRESET_DELETE = "PRESET_DELETE"
@@ -133,17 +134,23 @@ interface ModClearModules {
     type: "MOD_CLEAR_MODULES"
 }
 
-interface ModNameAddressUpdate {
-    type: "MOD_NAME_ADDRESS_UPDATE"
+interface ModNameUpdate {
+    type: "MOD_NAME_UPDATE"
+
+    modId: string
+    modName: string
+}
+
+interface ModAddressUpdate {
+    type: "MOD_ADDRESS_UPDATE"
 
     modId: string
     modAddress: number
-    modName: string
 }
 
 export type ModuleAction = 
     ModAddModule | ModDeleteModule | ModClearModules |
-    ModNameAddressUpdate | AppClearData
+    ModNameUpdate | ModAddressUpdate | AppClearData
 
 
 // -------------------------------------------------------------------------------------------    

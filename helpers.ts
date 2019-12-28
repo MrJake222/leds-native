@@ -73,20 +73,25 @@ export function title(str: string) {
 }
 
 /**
- * Checks if modName isn't empty and for invalid or
- * Duplicate addresses
+ * Checks if modName isn't empty
  * 
  * @param modName Module's name
- * @param modAddress Module's address
- * @param addressList Address list, for ex. from store
- * @param update Skip duplicate address check
  */
-export function validateModuleData(modName: string, modAddress: number, addressList: number[], update: boolean=false) {
+export function validateModuleName(modName: string): boolean {
     if (modName == "") {
         ToastAndroid.show("Module's name cannot be empty", ToastAndroid.SHORT);
         return false
     }
-    
+
+    return true
+}
+
+/** Check for duplicate address
+ * @param modAddress Module's address
+ * @param addressList Address list, for ex. from store
+ * @param update Skip duplicate address check
+ */
+export function validateModuleAddress(modAddress: number, addressList: number[], update: boolean=false): boolean {
     if (Number.isNaN(modAddress) || modAddress < 1 || modAddress > 247) {
         ToastAndroid.show("Invalid address. Should be 1-247", ToastAndroid.SHORT);
         return false
