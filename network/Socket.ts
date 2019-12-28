@@ -91,6 +91,11 @@ class Socket {
             if (!getAll) {
                 const storageDocsRaw = await AsyncStorage.getItem(fieldName)
                 storageDocs = JSON.parse(storageDocsRaw!)
+
+                // If adding module, show a Toast
+                if (fieldName == "modules") {
+                    ToastAndroid.show("Discovered " + docs[0].modType + " at " + docs[0].modAddress, ToastAndroid.SHORT)
+                }
             }
 
             docs.forEach((doc) => {
@@ -127,6 +132,14 @@ class Socket {
             }
 
             removeFromStorarge(fieldName, _id)
+        })
+
+        this.socket.on("addModuleFailed", ({ reason }: { reason: string }) => {
+            switch (reason) {
+                case "timeout":
+                    ToastAndroid.show("Reading module's type failed. Double check the address and powering of the device and try again.", ToastAndroid.LONG)
+                    break
+            }
         })
 
         this.socket.on("updateModule", ({ modId, modAddress, modName }: { modId: string, modAddress: number, modName: string }) => {
@@ -173,12 +186,11 @@ class Socket {
         }
     }
 
-    addModule(modAddress: number, modName: string, modType: string): boolean {
+    addModule(modAddress: number, modName: string): boolean {
         if (this.checkConnetionWithToast()) {
             this.socket.emit("addModule", {
                 modAddress: modAddress,
                 modName: modName,
-                modType: modType
             })
 
             return true
@@ -187,12 +199,13 @@ class Socket {
         return false
     }
 
-    updateModule(_id: string, modName: string, modAddress: number): boolean {
+    updateModule(_id: string, modName: string, modAddress: number, addressChangePacket: boolean): boolean {
         if (this.checkConnetionWithToast()) {
             this.socket.emit("updateModule", {
                 modId: _id,
                 modName: modName,
-                modAddress: modAddress
+                modAddress: modAddress,
+                addressChangePacket: addressChangePacket
             })
 
             return true

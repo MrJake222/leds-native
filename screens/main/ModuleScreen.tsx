@@ -13,6 +13,7 @@ import {
     Image,
     Alert,
     ToastAndroid,
+    Switch,
 } from 'react-native'
 
 import CardView from '../../elements/CardView';
@@ -53,7 +54,8 @@ interface ModuleScreenState {
     modName: string
     modAddress: number,
     presetName: string,
-    modValues: { [codename: string]: any }
+    modValues: { [codename: string]: any },
+    addressChangePacket: boolean
 }
 
 const connector = connect(mapStateToProps, mapDispatchToProps)
@@ -71,7 +73,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                         navigation.goBack()
                         store.dispatch(modDeleteModule(_id))
                         removeFromStorarge("modules", _id)
-                    }                    
+                    }
                 }
 
                 Alert.alert(
@@ -96,7 +98,8 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
             modName: modName,
             modAddress: modAddress,
             presetName: "",
-            modValues: props.modValues[_id]
+            modValues: props.modValues[_id],
+            addressChangePacket: false
         }
 
         this.apply = this.apply.bind(this)
@@ -113,7 +116,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
         if (this.state.modName != modName || this.state.modAddress != modAddress) {
 
             if (validateModuleData(this.state.modName, address, addressList, true)) {
-                if (socket.updateModule(_id, this.state.modName, address)) {
+                if (socket.updateModule(_id, this.state.modName, address, this.state.addressChangePacket)) {
                     this.props.updateNameAddress(_id, address, this.state.modName)
 
                     this.props.navigation.setParams({
@@ -151,7 +154,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
             delete values.preset
 
             if (socket.addPreset(this.state.presetName, _id, modType, values)) {
-                this.props.updateModField(_id, "preset",this.state.presetName)
+                this.props.updateModField(_id, "preset", this.state.presetName)
 
                 this.props.navigation.navigate("MainScreen")
             }
@@ -200,7 +203,16 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                     <NamedInput name="Module's name" value={this.state.modName} onChangeText={(value: string) => this.setState({ modName: value })} />
                     <NamedInput name="Module's address" value={this.state.modAddress.toString()} keyboardType="numeric" onChangeText={(value: string) => this.setState({ modAddress: parseInt(value) })} />
 
-                    {/* style={{ marginTop: 6 }} */}
+                    <View style={styles.switchView}>
+                        <View style={styles.switchText}>
+                            <Text>Send address change packet</Text>
+                        </View>
+
+                        <View style={styles.switch}>
+                            <Switch value={this.state.addressChangePacket} onValueChange={value => this.setState({addressChangePacket: value})} />
+                        </View>
+                    </View>
+
                     <Button title="Save" color="#4CAF50" onPress={this.apply} />
                 </CardView>
 
@@ -245,8 +257,8 @@ const styles = StyleSheet.create({
     },
 
     contents: {
-        paddingHorizontal: 4,
-        paddingVertical: 2,
+        // paddingHorizontal: 4,
+        // paddingVertical: 2,
     },
 
     topRight: {
@@ -257,4 +269,21 @@ const styles = StyleSheet.create({
         fontSize: 14,
         color: "#757575"
     },
+
+    switchView: {
+        flexDirection: "row",
+        marginTop: 4,
+        marginBottom: 12,
+        marginHorizontal: 10,
+    },
+
+    switchText: {
+        flex: 1,
+    },
+
+    switch: {
+        flexShrink: 1,
+
+        justifyContent: "center"
+    }
 })

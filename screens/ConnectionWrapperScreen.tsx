@@ -80,9 +80,9 @@ class ConnectionWrapperScreen extends React.Component<ConnectionWrapperScreenPro
                 AsyncStorage.clear()
             }} /> */}
 
-            {/* <Button title="Go" onPress={() => {
+            <Button title="Go" onPress={() => {
                 this.props.navigation.navigate("DrawerNavigator")
-            }} /> */}
+            }} />
 
             {this.props.isAppInitialized ? <View style={styles.status}>
                 <FlatList

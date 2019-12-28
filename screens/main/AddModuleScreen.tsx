@@ -34,7 +34,6 @@ interface AddModuleScreenOwnProps {
 interface AddModuleScreenState {
     modName: string
     modAddress: string
-    modType: string
 }
 
 const connector = connect(mapStateToProps, mapDispatchToProps)
@@ -47,7 +46,6 @@ class AddModuleScreen extends React.Component<AddModuleScreenProps, AddModuleScr
         this.state = {
             modName: "",
             modAddress: "0",
-            modType: Object.values(this.props.modTypes)[0].codename
         }
 
         this.updateValues = this.updateValues.bind(this)
@@ -66,7 +64,7 @@ class AddModuleScreen extends React.Component<AddModuleScreenProps, AddModuleScr
         var addressList = Object.values(this.props.modules).map((mod) => mod.modAddress)
 
         if (validateModuleData(this.state.modName, address, addressList)) {
-            if (socket.addModule(address, this.state.modName, this.state.modType)) {
+            if (socket.addModule(address, this.state.modName)) {
                 this.props.navigation.navigate("MainScreen")
             }
         }
@@ -81,10 +79,9 @@ class AddModuleScreen extends React.Component<AddModuleScreenProps, AddModuleScr
         return <View style={styles.container}>
             <NamedInput name="Module's name" value={this.state.modName} onChangeText={(value) => this.updateValues("modName", value)} />
             <NamedInput name="Module's address" value={this.state.modAddress} keyboardType="numeric" onChangeText={(value) => this.updateValues("modAddress", value)} />
-            <NamedPicker name="Module's type" value={this.state.modType} items={modTypesList} onValueChange={(value) => this.updateValues("modType", value)} />
 
             <View style={{width: "70%", alignSelf: "center", marginTop: 16}}>
-                <Button title="Create" color="#4CAF50" onPress={() => this.create()}/>   
+                <Button title="Create" color="#4CAF50" onPress={this.create}/>   
             </View>
         </View>
     }
