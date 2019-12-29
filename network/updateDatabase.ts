@@ -11,6 +11,8 @@ export async function loadDatabase(lastModified: LastModified[], socket: SocketI
     lastModified.forEach(async ({fieldName, lastModified}) => {
         var lastModifiedClient: string | Date | null = await AsyncStorage.getItem(fieldName + "LastModified")
 
+        // console.log("force = " + force)
+
         if (lastModifiedClient != null)
             lastModifiedClient = new Date(lastModifiedClient)
         else
@@ -22,7 +24,7 @@ export async function loadDatabase(lastModified: LastModified[], socket: SocketI
 
         if (force || new Date(lastModified) > lastModifiedClient!) {
             // if (fieldName == "modules")
-            console.log(fieldName + " from server")
+            console.log(fieldName + " from server, force = " + force)
 
             socket.emit("getAll", {
                 fieldName: fieldName

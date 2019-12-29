@@ -16,7 +16,6 @@ import { title } from '../helpers';
 import RootState from '../redux/RootState';
 import { NavigationScreenProp } from 'react-navigation';
 import Icon from 'react-native-ionicons'
-import {  } from 'react-native-gesture-handler';
 import { socket } from '../network/Socket';
 // import store from '../redux/store';
 
@@ -46,8 +45,12 @@ class ConnectionWrapperScreen extends React.Component<ConnectionWrapperScreenPro
         console.log("isAppInitialized", isAppInitialized)
         console.log("ignoreMount", ignoreMount)
 
-        if (!isAppInitialized && !ignoreMount) {
-            this.props.navigation.navigate("AppConfigScreen")
+        if (!ignoreMount) {
+            if (this.props.isAppLoaded)
+                this.props.navigation.navigate("DrawerNavigator")
+
+            else if (!isAppInitialized)
+                this.props.navigation.navigate("AppConfigScreen")
         }
     }
 
@@ -80,9 +83,9 @@ class ConnectionWrapperScreen extends React.Component<ConnectionWrapperScreenPro
                 AsyncStorage.clear()
             }} /> */}
 
-            <Button title="Go" onPress={() => {
+            {/* <Button title="Go" onPress={() => {
                 this.props.navigation.navigate("DrawerNavigator")
-            }} />
+            }} /> */}
 
             {this.props.isAppInitialized ? <View style={styles.status}>
                 <FlatList

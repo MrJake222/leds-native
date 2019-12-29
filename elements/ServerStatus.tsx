@@ -11,6 +11,8 @@ import {
 import CardView from './CardView';
 import IndicatorHelper from '../indicator/IndicatorHelper';
 import RootState from '../redux/RootState';
+import { socket } from '../network/Socket';
+import { rootNavigatorNavigate } from '../RootNavigatorRef';
 
 const mapStateToProps = (state: RootState) => ({
     serverAddress: state.serverData.serverAddress,

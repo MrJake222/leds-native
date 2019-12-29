@@ -220,8 +220,6 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                     style={[styles.cardviewInner, { marginRight: 6 }]}
                     contentStyle={styles.contents}>
 
-                    <Text style={styles.topRight}>Properties</Text>
-
                     <NamedInput name="Module's name" value={this.state.modName} onChangeText={(value: string) => this.setState({ modName: value })} />
 
                     <Button title="Save" color="#4CAF50" onPress={this.updateName} />
@@ -230,8 +228,6 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                 <CardView
                     style={[styles.cardviewInner, { marginLeft: 6 }]}
                     contentStyle={styles.contents}>
-
-                    <Text style={styles.topRight}>Add preset</Text>
 
                     <NamedInput name="Preset's name" value={this.state.presetName} onChangeText={(value: string) => this.setState({ presetName: value })} />
 
@@ -243,7 +239,6 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                 <View style={[{ width: "50%", paddingRight: 6, paddingTop: 12 }]}>
 
                     <CardView contentStyle={styles.contents}>
-                        <Text style={styles.topRight}>Address</Text>
                         <NamedInput name="Module's address" value={this.state.modAddress} keyboardType="numeric" onChangeText={(value: string) => this.setState({ modAddress: value })} />
                         <Text style={styles.warn}>Warning: This will also change the Modbus address of the device</Text>
 
@@ -296,6 +291,7 @@ const styles = StyleSheet.create({
     warn: {
         color: "#757575",
         textAlign: "center",
-        marginBottom: 8
+        marginBottom: 8,
+        paddingHorizontal: 8,
     }
 })

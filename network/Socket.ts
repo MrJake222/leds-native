@@ -60,12 +60,6 @@ class Socket {
     addEvents(store: Store) {
         this.socket.on("connect", () => {
             store.dispatch(serverUpdateConnectionStatus(true, "Connected"))
-
-            if (!store.getState().appStatus.isAppLoaded) {
-                store.dispatch(appConnectionFailed(false, 0))
-
-                this.socket.emit("forceReload")
-            }
         })
 
         this.socket.on("disconnect", () => {
@@ -73,7 +67,11 @@ class Socket {
         })
 
         this.socket.on("init", ({ lastModified, force }: { lastModified: LastModified[], force: boolean }) => {
+            // console.log("init force="+force+", loaded="+store.getState().appStatus.isAppLoaded)
+
             if (!store.getState().appStatus.isAppLoaded) {
+                store.dispatch(appConnectionFailed(false, 0))
+
                 loadDatabase(lastModified, this.socket, force)
             }
         })
