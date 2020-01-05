@@ -22,7 +22,7 @@ import { ConnectedProps, connect } from 'react-redux';
 import RootState from '../../redux/RootState';
 import Preset from '../../types/Preset';
 import PresetComponent from '../../elements/PresetComponent';
-import { socket } from '../../network/Socket';
+import { net } from '../../network/Network';
 import { NavigationStackScreenProps, NavigationStackProp } from 'react-navigation-stack';
 
 const mapStateToProps = (state: RootState) => {
@@ -90,7 +90,7 @@ class MainScreen extends React.PureComponent<MainScreenProps> {
         rootNavigatorNavigate("ConnectionWrapperScreen")
 
         this.props.clearData()
-        socket.forceReload()
+        net.forceReload()
     }
 
     applyPreset(force: boolean) {
@@ -102,7 +102,7 @@ class MainScreen extends React.PureComponent<MainScreenProps> {
             modules = modules.filter(_id => this.props.modValues[_id].preset != presetName)
         
         if (modules.length > 0) {
-            if (socket.applyPreset(_id, modules)) {
+            if (net.applyPreset(_id, modules)) {
                 ToastAndroid.show("Applying preset " + presetName + " to " + modules.length + " modules", ToastAndroid.SHORT)
             }
         }

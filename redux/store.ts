@@ -6,7 +6,7 @@ import { appInitialize, serverUpdateConfig } from './actions';
 // import devToolsEnhancer from 'remote-redux-devtools';
 import RootState, { getDefaultState } from './RootState';
 import devToolsEnhancer, { composeWithDevTools } from 'remote-redux-devtools';
-import { socket } from '../network/Socket';
+import { net } from '../network/Network';
 
 const store = createStore<RootState, any, {}, {}>(reducer, getDefaultState(),
 
@@ -35,9 +35,9 @@ AsyncStorage.multiGet(["isAppInitialized", "serverAddress", "serverPort"], (err,
 
         console.log("init multiget")
 
-        if (socket.init(res.serverAddress, parseInt(res.serverPort))) {
-            socket.addEvents(store)
-            socket.connect(store)
+        if (net.init(res.serverAddress, parseInt(res.serverPort))) {
+            net.addEvents(store)
+            net.connect(store)
 
             // unsubStorage()
         }
@@ -63,9 +63,9 @@ const unsubStorage = store.subscribe(async () => {
         AsyncStorage.setItem("serverAddress", newAddress)
         AsyncStorage.setItem("serverPort", newPort.toString())
 
-        if (!socket.initialized && socket.init(newAddress, newPort)) {
-            socket.addEvents(store)
-            socket.connect(store)
+        if (!net.initialized && net.init(newAddress, newPort)) {
+            net.addEvents(store)
+            net.connect(store)
         }
 
         // unsubStorage()

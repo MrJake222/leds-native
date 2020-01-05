@@ -17,7 +17,7 @@ import {
 } from 'react-native'
 
 import CardView from '../../elements/CardView';
-import { modFieldUpdate, modDeleteModule, modNameUpdate } from '../../redux/actions';
+import { modFieldUpdate, modDeleteModule, modNameUpdate, modAddressUpdate } from '../../redux/actions';
 import { validateModuleName, validateModuleAddress, leadingZero } from '../../helpers';
 import { removeFromStorarge } from '../../network/updateDatabase';
 import FieldHelper from '../../field/FieldHelper';
@@ -27,7 +27,7 @@ import Module from '../../types/Module';
 import { NavigationScreenProp, NavigationRoute } from 'react-navigation';
 import IndicatorHelper from '../../indicator/IndicatorHelper';
 import NamedInput from '../../elements/NamedInput';
-import { socket } from '../../network/Socket';
+import { net } from '../../network/Network';
 
 const mapStateToProps = (state: RootState) => ({
     modFields: state.modFields,
@@ -38,6 +38,7 @@ const mapStateToProps = (state: RootState) => ({
 const mapDispatchToProps = {
     updateModField: (modId: string, item: string, value: any) => modFieldUpdate(modId, item, value),
     updateName: (modId: string, modName: string) => modNameUpdate(modId, modName),
+    updateAddress: (modId: string, newModAddress: number) => modAddressUpdate(modId, newModAddress)
 }
 
 export interface ModuleScreenNavigationParams {
@@ -69,7 +70,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
                 var proceed = () => {
                     const { _id } = navigation.getParam("mod")
 
-                    if (socket.deleteModule(_id)) {
+                    if (net.deleteModule(_id)) {
                         navigation.goBack()
                         store.dispatch(modDeleteModule(_id))
                         removeFromStorarge("modules", _id)
@@ -116,7 +117,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
         if (this.state.modName != modName) {
 
             if (validateModuleName(this.state.modName)) {
-                if (socket.updateModuleName(_id, this.state.modName)) {
+                if (net.updateModuleName(_id, this.state.modName)) {
                     this.props.updateName(_id, this.state.modName)
 
                     this.props.navigation.setParams({
@@ -139,16 +140,29 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
         const newAddress = parseInt(this.state.modAddress)
         const addressList = Object.values(store.getState().modules).map((mod) => mod.modAddress)
 
+        const proceed = async () => {
+            if (await net.updateModuleAddress(_id, newAddress)) {
+                this.props.updateAddress(_id, newAddress)
+
+                this.props.navigation.setParams({
+                    mod: {
+                        ...this.props.navigation.getParam("mod"),
+                        modAddress: newAddress,
+                    }
+                })
+            }
+
+        }
+
         if (newAddress != modAddress) {
             if (validateModuleAddress(modAddress, addressList, true)) {
-                if (socket.updateModuleAddress(_id, newAddress)) {
-                    this.props.navigation.setParams({
-                        mod: {
-                            ...this.props.navigation.getParam("mod"),
-                            modAddress: newAddress,
-                        }
-                    })
-                }
+                Alert.alert(
+                    "Are you sure?",
+                    "You're modifying real Modbus address of " + this.props.navigation.getParam("mod").modName + ".", [
+                        { text: "Cancel" },
+                        { text: "Change", onPress: proceed }
+                    ]
+                )
             }
         }
 
@@ -160,7 +174,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
     updateField(codename: string, value: any) {
         const { _id, modAddress, modType } = this.props.navigation.getParam("mod")
 
-        if (socket.updateModField(_id, modAddress, modType, codename, value)) {
+        if (net.updateModField(_id, modAddress, modType, codename, value)) {
             this.props.updateModField(_id, codename, value)
             this.props.updateModField(_id, "preset", null)
         }
@@ -175,7 +189,7 @@ class ModuleScreen extends React.Component<ModuleScreenProps, ModuleScreenState>
             delete values.modId
             delete values.preset
 
-            if (socket.addPreset(this.state.presetName, _id, modType, values)) {
+            if (net.addPreset(this.state.presetName, _id, modType, values)) {
                 this.props.updateModField(_id, "preset", this.state.presetName)
 
                 this.props.navigation.navigate("MainScreen")

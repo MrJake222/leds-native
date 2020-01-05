@@ -16,7 +16,7 @@ import IndicatorHelper from '../indicator/IndicatorHelper';
 import RootState from '../redux/RootState';
 import Preset from '../types/Preset';
 import ModType from '../types/ModType';
-import { socket } from '../network/Socket';
+import { net } from '../network/Network';
 
 interface PresetOwnProps {
     preset: Preset
@@ -76,7 +76,7 @@ class PresetComponent extends React.Component<PresetProps> {
                         "You're deleting preset " + presetName, [
                             { text: "Cancel" },
                             { text: "Delete", onPress: () => {
-                                if (socket.deletePreset(_id)) {
+                                if (net.deletePreset(_id)) {
                                     this.props.deletePreset(_id)
                                     removeFromStorarge("presets", _id)
                                 }

@@ -15,7 +15,7 @@ import { modAddModule } from '../../redux/actions';
 import RootState from '../../redux/RootState';
 import Module from '../../types/Module';
 import { NavigationScreenProp, NavigationRoute } from 'react-navigation';
-import { socket } from '../../network/Socket';
+import { net } from '../../network/Network';
 import { validateModuleName, validateModuleAddress } from '../../helpers';
 
 const mapStateToProps = (state: RootState) => ({
@@ -44,8 +44,8 @@ class AddModuleScreen extends React.Component<AddModuleScreenProps, AddModuleScr
         super(props)
 
         this.state = {
-            modName: "",
-            modAddress: "0",
+            modName: "test",
+            modAddress: "1",
         }
 
         this.updateValues = this.updateValues.bind(this)
@@ -59,12 +59,12 @@ class AddModuleScreen extends React.Component<AddModuleScreenProps, AddModuleScr
         })
     }
 
-    create() {
+    async create() {
         const address = parseInt(this.state.modAddress)
         var addressList = Object.values(this.props.modules).map((mod) => mod.modAddress)
 
         if (validateModuleName(this.state.modName) && validateModuleAddress(address, addressList)) {
-            if (socket.addModule(address, this.state.modName)) {
+            if (await net.addModule(address, this.state.modName)) {
                 this.props.navigation.navigate("MainScreen")
             }
         }

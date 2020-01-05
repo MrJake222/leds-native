@@ -16,7 +16,7 @@ import { title } from '../helpers';
 import RootState from '../redux/RootState';
 import { NavigationScreenProp } from 'react-navigation';
 import Icon from 'react-native-ionicons'
-import { socket } from '../network/Socket';
+import { net } from '../network/Network';
 // import store from '../redux/store';
 
 // Sorted array
@@ -98,7 +98,7 @@ class ConnectionWrapperScreen extends React.Component<ConnectionWrapperScreenPro
 
                 <Text style={[styles.failed, { backgroundColor: errorBackground, color: errorText }]}>Connection failed</Text>
                 <TouchableOpacity activeOpacity={0.7} onPress={() => {
-                    socket.reset()
+                    net.reset()
                     this.props.navigation.navigate("AppConfigScreen")
                 }}>
 

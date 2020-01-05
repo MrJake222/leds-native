@@ -65,8 +65,7 @@ class AppConfigScreen extends React.Component<AppConfigScreenProps, AppConfigScr
             <View style={styles.contents}>
                 <NamedInput name="Address" keyboardType="numeric" value={this.state.address} onChangeText={(value) => this.updateValues("address", value)}/>
                 <NamedInput name="Port" keyboardType="numeric" value={this.state.port} onChangeText={(value) => this.updateValues("port", value)}/>
-                <NamedInput name="Nickname" value={this.state.port} onChangeText={(value) => this.updateValues("port", value)}/>
-                                
+                                                
                 <View style={{alignItems: "flex-end", marginRight: 8, marginTop: 4}}>
                     <View style={{width: "50%"}}>
                         <Button title="Accept" color="#4CAF50" onPress={() => {
